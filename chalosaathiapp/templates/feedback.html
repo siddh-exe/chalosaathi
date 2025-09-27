@@ -1,0 +1,236 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+       
+        nav {
+            background-color: #28a745;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;        
+            text-align: center;
+        }
+
+        nav .left a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+       
+        .form-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .feedback-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            width: 100%;           
+            max-width: 400px;      
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #28a745;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #028a2d;
+        }
+
+        
+        .all-feedback {
+            padding: 20px;
+        }
+
+        .feedback-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feedback-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .feedback-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback-card h4 {
+            margin: 0 0 10px;
+            color: #059d7a;
+        }
+
+        .feedback-card p {
+            margin: 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .feedback-card small {
+            display: block;
+            margin-top: 10px;
+            font-size: 12px;
+            color: gray;
+        }
+        @media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .feedback-form input,
+    .feedback-form textarea,
+    .feedback-form button {
+        font-size: 14px;
+    }
+
+    nav {
+        flex-direction: column;
+    }
+
+    nav .left a {
+        display: block;
+        margin: 8px 0;
+    }
+}
+    </style>
+</head>
+<body>
+    
+    <nav>
+        <div class="left">
+            <a href="{% url 'index'%}">Home</a>
+            <a href="#findride">Find a Ride</a>
+            <a href="#offerride">Offer a Ride</a>
+            <a href="{% url 'feedback' %}">My Rides</a>
+            <a href="{% url 'profile' %}">Profile</a>
+            <a href="{% url 'aboutus' %}">About Us</a>
+        </div>
+        <a href="{% url 'signup' %}" style="color:white; font-weight:bold;">Login/Signup</a>
+    </nav>
+
+    
+    <div class="form-container">
+        <div class="feedback-container">
+            <h2>Feedback Form</h2>
+            <form id="feedbackForm" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+   
+    <div class="all-feedback">
+        <h2>All Feedback</h2>
+        <div class="feedback-list" id="feedback-container">
+      
+        </div>
+    </div>
+
+   <script>
+    async function loadFeedback() {
+        let response = await fetch("/feedback-data/");
+        let data = await response.json();
+
+        let container = document.getElementById("feedback-container");
+        container.innerHTML = "";
+
+        data.forEach((fb, index) => {
+            let card = document.createElement("div");
+            card.className = "feedback-card";
+            card.innerHTML = `
+                <h4>${fb.name}</h4>
+                <p>${fb.message}</p>
+                <small>${fb.created_at}</small>
+            `;
+            container.appendChild(card);
+
+            // animate cards one by one
+            setTimeout(() => card.classList.add("show"), 100 * index);
+        });
+    }
+
+    // Handle form submission with AJAX
+    document.getElementById("feedbackForm").addEventListener("submit", async function (e) {
+        e.preventDefault(); // stop full reload
+
+        let formData = new FormData(this);
+
+        let response = await fetch("", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (response.ok) {
+            this.reset(); // clear form fields
+            // Refresh feedback list
+            await loadFeedback();
+            // Show thank-you message after update
+            alert("Thank you for your kind feedback.");
+        } else {
+            alert("Something went wrong!");
+        }
+    });
+
+    // Load all feedback when page opens
+    document.addEventListener("DOMContentLoaded", loadFeedback);
+</script>
+
+
+</body>
+</html>

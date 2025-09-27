@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chalo Saathi - Login</title>
+ 
+  <style>
+  
+    .login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      padding: 40px;
+    }
+
+   
+    .container {
+      flex: 1;
+      max-width: 350px;
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .container h2 {
+      margin-bottom: 20px;
+    }
+
+    .container input, .container button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-left: -13px;
+    }
+
+    .container button {
+      background: #46C3C5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .container button:hover {
+      background: #3a9fa1;
+    }
+
+    .platforms {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 250px;
+    }
+
+    .platforms .card {
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .platforms .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .platforms img {
+      max-width: 120px;
+      margin-bottom: 10px;
+    }
+
+    .platforms p {
+      font-size: 14px;
+      color: #333;
+    }
+
+   
+    @media(max-width: 900px) {
+      .login-wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+      .platforms {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 100%;
+      }
+ 
+    }
+  .password-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.password-wrapper input {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.forgot-link {
+  font-size: 14px;
+  color: #46C3C5;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+
+    <div class="platforms">
+      <div class="card">
+        <a href="https://internsaathi.com/" target="_blank">
+          <img src="{% static 'images/intersaathi.jpg' %}" alt="Intern Saathi">
+        </a>
+        <p>Internships connecting students with industry-ready opportunities.</p>
+      </div>
+
+      <div class="card">
+        <a href="https://naukrisaathi.com/" target="_blank">
+          <img src="{% static 'images/naukrisaathi.jpg' %}" alt="Naukri Saathi">
+        </a>
+        <p>Helping job seekers land the right roles across India.</p>
+      </div>
+    </div>
+
+
+    <div class="container">
+      <h2>Chalo Saathi Login</h2>
+   <form id="loginForm" method="POST" action="{% url 'login' %}">
+  {% csrf_token %}
+  
+  <input type="tel" name="phone" placeholder="Phone Number" required>
+  <input type="email" name="email" placeholder="Email" required>
+  
+  <div class="password-wrapper">
+    <input type="password" name="password" placeholder="Password" required>
+    <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot Password?</a>
+  </div>
+  
+  <button type="submit">Login</button>
+  <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+</form>
+    </div>
+
+
+    <div class="platforms">
+      <div class="card">
+        <a href="https://tasksaathi.com/" target="_blank">
+          <img src="{% static 'images/tasksaathi.jpg' %}" alt="Task Saathi">
+        </a>
+        <p>Task Saathi – Making work effortless and stress-free.</p>
+      </div>
+
+      <div class="card">
+        <a href="https://kaushalsaathi.com/" target="_blank">
+          <img src="{% static 'images/kaushalsaathi.jpg' %}" alt="Kaushal Saathi">
+        </a>
+        <p>Bridging the gap between potential and opportunity.</p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+

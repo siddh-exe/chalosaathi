@@ -1,0 +1,93 @@
+  
+    .login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      padding: 40px;
+    }
+
+   
+    .container {
+      flex: 1;  
+      max-width: 350px;
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      text-align: center;
+
+        
+    }
+
+    .container h2 {
+      margin-bottom: 20px;
+    }
+
+   .container input,
+.container button {
+  width: 70%;          
+  padding: 10px;
+  margin: 10px auto;   
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  display: block;      /
+}
+
+    .container button {
+      background: #46C3C5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .container button:hover {
+      background: #3a9fa1;
+    }
+
+    .platforms {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 250px;
+    }
+
+    .platforms .card {
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .platforms .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .platforms img {
+      max-width: 120px;
+      margin-bottom: 10px;
+     mix-blend-mode: darken;
+    }
+
+    .platforms p {
+      font-size: 14px;
+      color: #333;
+    }
+
+   
+    @media(max-width: 900px) {
+      .login-wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+      .platforms {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 100%;
+      }
+    }

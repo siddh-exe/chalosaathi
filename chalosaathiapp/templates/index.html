@@ -1,0 +1,274 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chalo Saathi</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+  <header>
+    
+    <img src="{% static 'images/chalosaathi.jpg' %}" alt="ChaloSaathi Logo" width="200px">
+    <h1>ChaloSaathi</h1>
+    <p>Share rides to your workplace and save on expenses!</p>
+  </header>
+
+  <nav>
+    <div class="left">
+      <a href="{% url 'index'%}">Home</a>
+ <a href="#findride">Find a Ride</a>
+  <a href="#offerride">Offer a Ride</a>
+      <a href="{% url 'feedback' %}">My Rides</a>
+      <a href="{% url 'profile' %}">Profile</a>
+  <a href="{% url 'aboutus' %}">About Us</a>
+  
+
+    </div>
+    {% if user.is_authenticated %}
+    <a href="{% url 'profile' %}">
+      {% if avatar %}
+        <img src="{{ avatar }}" alt="Avatar" class="nav-avatar">
+      {% else %}
+        <img src="{% static 'images/default-avatar.png' %}" alt="Avatar" class="nav-avatar">
+      {% endif %}
+    </a>
+  {% else %}
+    <a href="{% url 'login' %}">Login/Signup</a>
+  {% endif %}
+  </nav>
+
+  <div class="hero">
+    <h1>Find Your Ride Partner Today</h1>
+    <p>Connect with people going to the same place and split the travel costs.</p>
+
+  <div class="steps-container">
+    <div class="step-card">
+      <h3>Step 1 : Sign Up</h3>
+      <p>Create an account and verify your profile for safety.</p>
+    </div>
+
+    <div class="step-card">
+      <h3>Step 2 : Search or offer</h3>
+      <p>Find rides or offer your own based on location and time.</p>
+    </div>
+
+    <div class="step-card step-3">
+      <div>
+        <h3>Step 3 : Match & Ride</h3>
+        <p>Chat, confirm, and share the ride expenses.</p>
+      </div>
+    </div>
+  </div>
+  </div>
+  <button type="button" class="toggle-btn" onclick="toggleForm()">Publish your Ride</button>
+  <div class="container">
+    
+  <div id="ride-card" class="card">
+    <h2 id="formTitle">Find a Ride</h2>
+    <form id="findrideForm" class="active">
+      <label for="gender">Gender :</label>
+      <select required>
+        <option value="" disabled selected hidden>Select Gender...</option>
+        <option value="any">Male</option>
+        <option value="male">Female</option>
+        <option value="female">Both</option>
+      </select>
+
+      <label for="from">From :</label>
+      <input type="text" id="from" placeholder="Enter Pickup Location">
+
+      <label for="to">To :</label>
+      <input type="text" id="to" placeholder="Enter Destination">
+
+      <label for="date">Date :</label>
+      <input type="date" id="date">
+
+      <label for="time">Time :</label>
+      <input type="time" id="time">
+
+      <div class="btn-group">
+  <button type="submit" onclick="showAlert()">Search Rides</button>
+  
+</div>
+    </form>
+
+    
+    <form id="offerrideForm">
+      <label for="gender2">Gender :</label>
+      <select required>
+        <option value="" disabled selected hidden>Select Gender...</option>
+        <option value="any">Male</option>
+        <option value="male">Female</option>
+        <option value="female">Both</option>
+      </select>
+
+      <label for="from2">From :</label>
+      <input type="text" id="from2" placeholder="Enter Pickup Location">
+
+      <label for="to2">To :</label>
+      <input type="text" id="to2" placeholder="Enter Destination">
+
+      <label for="vehino">Vehicle Number :</label>
+      <input type="text" id="vehino" placeholder="Enter Vehicle Registration Number">
+
+      <label for="vehiname">Vehicle Model Name:</label>
+      <input type="text" id="vehiname" placeholder="Enter Vehicle Model Name">
+
+      <label for="date2">Date :</label>
+      <input type="date" id="date2">
+
+      <label for="time2">Time :</label>
+      <input type="time" id="time2">
+
+      <label for="seats">Available Seats :</label>
+      <select id="seats">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+
+      <div class="btn-group">
+  <button type="submit">Post Ride</button>
+  
+</div>
+
+    </form>
+
+    
+    
+  </div>
+</div>
+
+
+    <div class="divider"></div>
+
+    <section>
+      <h1>Our Other Platforms</h1>
+
+      <div class="platforms">
+        <div class="card">
+          <a href="https://internsaathi.com/" target="_blank">
+          <img src="{% static 'images/intersaathi.jpg' %}" alt="Intern Saathi">
+          </a>
+          <p>Your trusted partner for<br>
+            internships, connecting students<br>
+            with industry-ready opportunities.
+          </p>
+
+        </div>
+
+        <div class="card">
+          <a href="https://naukrisaathi.com/" target="_blank">
+          
+          <img src="{% static 'images/naukrisaathi.jpg' %}" alt="Naukri Saathi">
+          </a>
+          <p>Empowering job seekers and<br>
+            professionals to land the right<br>
+            roles across India</p>
+        </div>
+
+        <div class="card">
+           <a href="https://tasksaathi.com/" target="_blank">
+          <img src="{% static 'images/tasksaathi.jpg' %}" alt="Task Saathi">
+          </a>
+          <p>Task Saathi – Making work<br>
+            effortless, organized, and stress-free.</p>
+        </div>
+
+        <div class="card">
+                  <a href="https://kaushalsaathi.com/" target="_blank">
+          <img src="{% static 'images/kaushalsaathi.jpg' %}" alt="Kaushal Saathi">
+                  </a>
+          <p>Kaushal Saathi – Bridging the gap<br>
+            between potential and<br>
+            opportunity for every woman.
+          </p>
+        </div>
+
+        <div class="card">
+          <a href="https://sunsysglobal.com/" target="_blank">
+          <img src="{% static 'images/sunsys.jpg' %}" alt="Sunsys">
+          </a>
+          <p>Sunsys Techsol – Your trusted<br>
+            partner in renewable and<br>
+            affordable solar energy.</p>
+    
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-container">
+        <div class="footer-left">
+          <h3>Contact Us :-</h3>
+          <p>info@chalosaathi.com</p>
+          <p>admin@chalosaathi.com</p>
+    
+        </div>
+
+          <div class="footer-top">
+    <p>
+      Powered by 
+      <a href="https://sunsysglobal.com/" target="_blank">
+      <img src="{% static 'images/sunsys.jpg' %}" alt="Sunsys Logo" class="footer-logo">
+      </a>
+      <a href="https://www.linkedin.com/company/sunsystechsol-pvt-ltd/" target="blank">
+        <img src="{% static 'images/linkedin.svg' %}" alt="LinkedIn" class="social-icon">
+      </a>
+    </p>
+  </div>
+
+    <div class="footer-social">
+    <p>Follow us on</p>
+     <a href="https://www.linkedin.com/company/sunsystechsol-pvt-ltd/" target="_blank">
+        <img src="{% static 'images/linkedin.svg' %}" alt="LinkedIn" class="social-icon">
+      </a>
+    <a href="https://www.instagram.com/chalo_saathi/" target="_blank">
+      <img src="{% static 'images/instagram.png' %}" alt="Instagram" class="social-icon">
+    </a>
+    <a href="https://x.com/Chalo_Saathi" target="_blank">
+      <img src="{% static 'images/twitter.png' %}" alt="Twitter" class="social-icon">
+    </a>
+  </div>
+
+      <div class="footer-bottom">
+        <p>© 2025 Chalo Saathi. All Rights Reserved. |
+          <a href="#">Privacy Policy</a> |
+          <a href="#">Terms & Conditions</a>
+        </p>
+      </div>
+    </footer>
+    <script>
+  let isFindRide = true;
+  function toggleForm() {
+    const findForm = document.getElementById("findrideForm");
+    const offerForm = document.getElementById("offerrideForm");
+    const formTitle = document.getElementById("formTitle");
+    const toggleBtn = document.querySelector(".toggle-btn");
+
+    if (isFindRide) {
+      findForm.classList.remove("active");
+      offerForm.classList.add("active");
+      formTitle.textContent = "Publish Your Ride";
+      toggleBtn.textContent = "Find a Ride";
+    } else {
+      offerForm.classList.remove("active");
+      findForm.classList.add("active");
+      formTitle.textContent = "Find a Ride";
+      toggleBtn.textContent = "Publish Your Ride";
+    }
+
+    isFindRide = !isFindRide;
+  }
+  function showAlert() {
+            alert("Please verify driver's id proof and vehicle's registration number same as mention");
+        }
+</script>
+
+</body>
+</html>

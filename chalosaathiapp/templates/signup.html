@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chalo Saathi - Sign Up</title>
+  <style>
+  body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+  padding-top: 5px;        
+}
+
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.25);
+      width: 90%;
+      max-width: 520px;
+      text-align: center;
+    
+  
+    }
+
+    .avatar-upload {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .avatar-upload input {
+      display: none; 
+    }
+
+    .avatar-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #46C3C5;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+      background-image: url("https://cdn-icons-png.flaticon.com/512/847/847969.png"); 
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .avatar-preview:hover {
+      transform: scale(1.05);
+    }
+
+
+    .input-group {
+      margin: 12px 0;
+      width: 100%;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #fff;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+      appearance: none;       
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #46C3C5;
+      outline: none;
+      box-shadow: 0px 0px 6px rgba(70, 195, 197, 0.6);
+    }
+
+   
+    .input-group select {
+      background-image: url("data:image/svg+xml;utf8,<svg fill='%2346C3C5' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 18px;
+      padding-right: 40px; 
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #46C3C5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #3a9fa1;
+      transform: translateY(-2px);
+    }
+
+    p {
+      margin-top: 15px;
+      font-size: 15px;
+      color: #444;
+    }
+
+    p a {
+      color: #46C3C5;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    p a:hover {
+      text-decoration: underline;
+      color: #3a9fa1;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+ 
+    
+
+    <form id="signupForm" method="POST" action="{% url 'signup' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="avatar-upload">
+      <label for="avatarInput">
+        <div class="avatar-preview" id="avatarPreview"></div>
+      </label>
+      <input type="file" id="avatarInput" accept="image/*">
+    </div>
+      <div class="input-group">
+        <input type="text" name="full_name" placeholder="Full Name" required>
+      </div>
+      
+      <div class="input-group">
+        <input type="tel" name="phone" placeholder="Phone Number" required>
+      </div>
+      
+      <div class="input-group">
+        <input type="email" name="email" placeholder="Email" required>
+      </div>
+      <div class="input-group">
+      <input type="text" name="aadhaar" placeholder="Aadhaar Number" id="aadhaar" 
+              required>
+    </div>
+    <div class="input-group">
+      <select name="gender" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+      <div class="input-group">
+        <input type="password" name="password" placeholder="Password" required>
+      </div>
+
+      <div class="input-group">
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+      </div>
+
+
+      <button type="submit">Sign Up</button>
+      <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    </form>
+  </div>
+
+  <script>
+   
+    const avatarInput = document.getElementById("avatarInput");
+    const avatarPreview = document.getElementById("avatarPreview");
+
+    avatarInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          avatarPreview.style.backgroundImage = `url(${e.target.result})`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    const input = document.getElementById('aadhaar');
+
+input.addEventListener('input', (e) => {
+  let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+  value = value.match(/.{1,4}/g)?.join(' ') || ''; // Insert spaces every 4 digits
+  e.target.value = value;
+});
+  </script>
+</body>
+</html>

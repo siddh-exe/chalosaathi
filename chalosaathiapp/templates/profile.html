@@ -1,0 +1,78 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .profile-card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+    }
+    .profile-card img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+      border: 3px solid #46C3C5;
+    }
+    .profile-card h2 {
+      margin: 10px 0;
+      color: #333;
+    }
+    .profile-card p {
+      margin: 5px 0;
+      color: #555;
+    }
+    .btn-logout {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #e63946;
+      color: white;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-logout:hover {
+      background: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-card">
+    {% if avatar %}
+      <img src="{{ avatar }}" alt="User Avatar">
+    {% else %}
+      <img src="{% static 'images/default-avatar.png' %}" alt="Default Avatar">
+    {% endif %}
+
+    <h2>{{ full_name }}</h2>
+    <p><strong>Email:</strong> {{ email }}</p>
+    <p><strong>Phone:</strong> {{ phone }}</p>
+    <p><strong>Aadhaar:</strong> {{ aadhaar }}</p>
+    <p><strong>Gender:</strong> {{ gender }}</p>
+
+    <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+  </div>
+
+</body>
+</html>
