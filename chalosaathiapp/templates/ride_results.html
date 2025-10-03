@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Rides</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .search-info {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .distance-filter {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .distance-filter h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .filter-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .filter-option {
+            display: flex;
+            align-items: center;
+        }
+        .filter-option input {
+            margin-right: 5px;
+        }
+        .ride-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: box-shadow 0.3s;
+        }
+        .ride-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .ride-card.hidden {
+            display: none;
+        }
+        .ride-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .route {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .price {
+            font-size: 20px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .ride-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .detail-item {
+            display: flex;
+            align-items: center;
+        }
+        .detail-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-book {
+            background-color: #27ae60;
+        }
+        .btn-book:hover {
+            background-color: #219a52;
+        }
+        .no-rides {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+        }
+        #map {
+            height: 400px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .back-btn {
+            margin-bottom: 20px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .filter-info {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .debug-info {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .disabled-filter {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'find_ride' %}" class="btn back-btn">← Back to Search</a>
+        
+        <h1>Available Rides</h1>
+        
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+        
+        <div class="search-info">
+            <strong>From:</strong> {{ search_params.pickup }} → 
+            <strong>To:</strong> {{ search_params.destination }}<br>
+            <strong>Date:</strong> {{ search_params.date }} 
+            <strong>Time:</strong> {{ search_params.time }}
+        </div>
+        
+        <!-- Debug Information -->
+        <div class="debug-info">
+            Debug Info: Found {{ rides|length }} rides<br>
+            {% if search_params %}
+            Search Parameters: {{ search_params }}<br>
+            {% endif %}
+            {% if request.POST %}
+            POST Data: {{ request.POST }}<br>
+            {% endif %}
+        </div>
+        
+        <!-- Distance Filter - Moved outside the rides check -->
+        <div class="distance-filter {% if not rides %}disabled-filter{% endif %}">
+            <h3>Filter by Pickup Distance</h3>
+            <div class="filter-options">
+                <div class="filter-option">
+                    <input type="radio" id="filter-all" name="distanceFilter" value="all" checked>
+                    <label for="filter-all">All Rides</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="filter-500" name="distanceFilter" value="500">
+                    <label for="filter-500">Within 500m</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="filter-1000" name="distanceFilter" value="1000">
+                    <label for="filter-1000">Within 1km</label>
+                </div>
+                <div class="filter-option">
+                    <input type="radio" id="filter-2000" name="distanceFilter" value="2000">
+                    <label for="filter-2000">Within 2km</label>
+                </div>
+            </div>
+            <div class="filter-info" id="filter-info">
+                {% if rides %}
+                    Showing all {{ rides|length }} rides
+                {% else %}
+                    No rides found to filter
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if rides %}
+            <div id="map" class="loading">Loading map...</div>
+            
+            <div id="rides-container">
+                {% for ride in rides %}
+                <div class="ride-card" 
+                     data-ride-id="{{ ride.id }}" 
+                     data-distance-km="{% if ride.pickup_distance %}{{ ride.pickup_distance }}{% else %}0{% endif %}">
+                    <div class="ride-header">
+                        <div class="route">{{ ride.pickup }} → {{ ride.destination }}</div>
+                        <div class="price">₹{{ ride.cost }}</div>
+                    </div>
+                    
+                    <div class="ride-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Driver:</span> {{ ride.user.username }}
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date:</span> {{ ride.date }}
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time:</span> {{ ride.time }}
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }}
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type:</span> {{ ride.get_vehicle_type_display }}
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Distance:</span> {{ ride.distance_km }} km
+                        </div>
+                        {% if ride.pickup_distance %}
+                        <div class="detail-item">
+                            <span class="detail-label">Pickup Distance:</span> {{ ride.pickup_distance }} km
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <span class="detail-label">Gender Preference:</span> {{ ride.get_gender_display }}
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="btn btn-book" onclick="bookRide({{ ride.id }}); return false;">Book This Ride</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-rides">
+                <h3>No rides found matching your criteria.</h3>
+                <p>Try adjusting your search parameters or check back later.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            const filterInfo = document.getElementById('filter-info');
+            const ridesContainer = document.getElementById('rides-container');
+            
+            // Initialize map
+            const mapElement = document.getElementById('map');
+            let map;
+            let markers = {};
+            
+            // Check if we have rides to work with - Fixed Django template syntax
+            const hasRides = {% if rides %}true{% else %}false{% endif %};
+            console.log('Has rides:', hasRides);
+            
+            if (mapElement && hasRides) {
+                try {
+                    map = L.map('map').setView([20.5937, 78.9629], 5); // Center of India
+                    
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                    
+                    // Create ride data from Django context
+                    const rides = [
+                        {% for ride in rides %}
+                        {
+                            id: {{ ride.id }},
+                            pickup: "{{ ride.pickup|escapejs }}",
+                            destination: "{{ ride.destination|escapejs }}",
+                            driver: "{{ ride.user.username|escapejs }}",
+                            pickup_coords: {% if ride.pickup_coords %}[{{ ride.pickup_coords }}]{% else %}null{% endif %},
+                            destination_coords: {% if ride.destination_coords %}[{{ ride.destination_coords }}]{% else %}null{% endif %},
+                            pickup_distance: {% if ride.pickup_distance %}{{ ride.pickup_distance }}{% else %}0{% endif %}
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ];
+                    
+                    console.log('Rides data:', rides);
+                    
+                    // Add markers for each ride
+                    rides.forEach(function(ride) {
+                        const rideMarkers = [];
+                        
+                        if (ride.pickup_coords) {
+                            const pickupMarker = L.marker(ride.pickup_coords)
+                                .bindPopup('<b>Pickup:</b> ' + ride.pickup + '<br><b>Driver:</b> ' + ride.driver);
+                            rideMarkers.push(pickupMarker);
+                        }
+                        
+                        if (ride.destination_coords) {
+                            const destMarker = L.marker(ride.destination_coords)
+                                .bindPopup('<b>Destination:</b> ' + ride.destination + '<br><b>Driver:</b> ' + ride.driver);
+                            rideMarkers.push(destMarker);
+                        }
+                        
+                        // Store markers for this ride
+                        markers[ride.id] = rideMarkers;
+                    });
+                    
+                    // Remove loading message
+                    mapElement.classList.remove('loading');
+                    
+                    // Initial filter application
+                    filterRides();
+                } catch (error) {
+                    console.error('Error initializing map:', error);
+                    mapElement.innerHTML = '<div class="error-message">Error loading map. Please refresh the page.</div>';
+                }
+            }
+            
+            // Filter rides based on selected distance
+            function filterRides() {
+                if (!hasRides) {
+                    console.log('No rides to filter');
+                    return;
+                }
+                
+                const selectedFilter = document.querySelector('input[name="distanceFilter"]:checked').value;
+                const rideCards = document.querySelectorAll('.ride-card');
+                let visibleCount = 0;
+                
+                console.log('Filtering rides with filter:', selectedFilter);
+                console.log('Found ride cards:', rideCards.length);
+                
+                // Clear all markers from map
+                Object.values(markers).forEach(rideMarkers => {
+                    rideMarkers.forEach(marker => {
+                        if (map && map.hasLayer(marker)) {
+                            map.removeLayer(marker);
+                        }
+                    });
+                });
+                
+                rideCards.forEach(function(card) {
+                    const rideId = card.dataset.rideId;
+                    const distanceKm = parseFloat(card.dataset.distanceKm);
+                    const distanceM = distanceKm * 1000; // Convert to meters
+                    
+                    let shouldShow = false;
+                    
+                    if (selectedFilter === 'all') {
+                        shouldShow = true;
+                    } else if (!isNaN(distanceM) && distanceM <= parseFloat(selectedFilter)) {
+                        shouldShow = true;
+                    }
+                    
+                    if (shouldShow) {
+                        card.classList.remove('hidden');
+                        visibleCount++;
+                        
+                        // Add markers back to map for visible rides
+                        if (markers[rideId]) {
+                            markers[rideId].forEach(marker => {
+                                if (map) {
+                                    marker.addTo(map);
+                                }
+                            });
+                        }
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+                
+                // Update filter info
+                if (selectedFilter === 'all') {
+                    filterInfo.textContent = `Showing all ${visibleCount} rides`;
+                } else {
+                    const filterText = selectedFilter === '500' ? '500m' : 
+                                     selectedFilter === '1000' ? '1km' : '2km';
+                    filterInfo.textContent = `Showing ${visibleCount} rides within ${filterText}`;
+                }
+                
+                // Adjust map view to show visible markers
+                if (map && visibleCount > 0) {
+                    const bounds = [];
+                    Object.keys(markers).forEach(rideId => {
+                        const card = document.querySelector(`[data-ride-id="${rideId}"]`);
+                        if (card && !card.classList.contains('hidden')) {
+                            markers[rideId].forEach(marker => {
+                                bounds.push(marker.getLatLng());
+                            });
+                        }
+                    });
+                    
+                    if (bounds.length > 0) {
+                        map.fitBounds(bounds);
+                    }
+                }
+            }
+            
+            // Add event listeners to filter options
+            const filterOptions = document.querySelectorAll('input[name="distanceFilter"]');
+            filterOptions.forEach(option => {
+                option.addEventListener('change', filterRides);
+            });
+            
+            // Book ride function
+            window.bookRide = function(rideId) {
+                // This would typically make an AJAX request or redirect to a booking page
+                alert(`Booking ride with ID: ${rideId}`);
+            };
+        });
+    </script>
+</body>
+</html>

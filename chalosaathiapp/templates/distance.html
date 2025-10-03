@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Distance Calculator with Autocomplete</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Leaflet-Geosearch (for autocomplete) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.1.0/dist/geosearch.css"/>
+  <script src="https://unpkg.com/leaflet-geosearch@3.1.0/dist/bundle.min.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    form { margin-bottom: 20px; }
+    input, button { padding: 8px; margin: 5px; width: 250px; }
+    #result { font-weight: bold; color: green; }
+    #map { height: 400px; width: 100%; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Distance Calculator</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="text" id="origin" name="origin" placeholder="Enter starting location" required>
+    <input type="text" id="destination" name="destination" placeholder="Enter destination" required>
+    <button type="submit">Get Distance</button>
+  </form>
+
+  {% if distance %}
+    <div id="result">
+      Distance between <b>{{ origin }}</b> and <b>{{ destination }}</b>: {{ distance }} km
+    </div>
+    <div id="map"></div>
+
+    <script>
+      var map = L.map("map").setView([{{ origin_lat }}, {{ origin_lng }}], 6);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors"
+      }).addTo(map);
+
+      var originMarker = L.marker([{{ origin_lat }}, {{ origin_lng }}]).addTo(map)
+        .bindPopup("Origin: {{ origin }}").openPopup();
+
+      var destMarker = L.marker([{{ destination_lat }}, {{ destination_lng }}]).addTo(map)
+        .bindPopup("Destination: {{ destination }}");
+
+      // Draw line between the two markers
+      var latlngs = [
+        [{{ origin_lat }}, {{ origin_lng }}],
+        [{{ destination_lat }}, {{ destination_lng }}]
+      ];
+      var polyline = L.polyline(latlngs, { color: "blue" }).addTo(map);
+      map.fitBounds(polyline.getBounds());
+    </script>
+  {% endif %}
+
+  <script>
+    // Enable autocomplete for input fields
+    const provider = new window.GeoSearch.OpenStreetMapProvider();
+
+    function enableAutocomplete(inputId) {
+      const input = document.getElementById(inputId);
+
+      input.addEventListener("input", async () => {
+        if (input.value.length > 2) {
+          const results = await provider.search({ query: input.value });
+          
+          // If found, autocomplete the first result
+          if (results.length > 0) {
+            input.setAttribute("list", inputId + "-list");
+            let datalist = document.getElementById(inputId + "-list");
+            if (!datalist) {
+              datalist = document.createElement("datalist");
+              datalist.id = inputId + "-list";
+              document.body.appendChild(datalist);
+            }
+            datalist.innerHTML = "";
+            results.forEach(r => {
+              let option = document.createElement("option");
+              option.value = r.label;
+              datalist.appendChild(option);
+            });
+            input.setAttribute("list", datalist.id);
+          }
+        }
+      });
+    }
+
+    enableAutocomplete("origin");
+    enableAutocomplete("destination");
+  </script>
+</body>
+</html>

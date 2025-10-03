@@ -7,6 +7,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chalo Saathi</title>
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <style>
+    .autocomplete-wrapper {
+  position: relative;
+}
+
+.autocomplete-suggestions {
+  position: absolute;
+  background: white;
+  display: none;
+  border-radius: 8px;
+  margin-top: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;   /* match input width */
+  z-index: 1000;
+}
+
+.autocomplete-suggestions div {
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.autocomplete-suggestions div:hover {
+  background: #f1f1f1;
+}
+  </style>
 </head>
 
 <body>
@@ -70,74 +99,80 @@
     
   <div id="ride-card" class="card">
     <h2 id="formTitle">Find a Ride</h2>
-    <form id="findrideForm" class="active">
-      <label for="gender">Gender :</label>
-      <select required>
+
+   <form id="findrideForm" class="active" method="POST" action="{% url 'find_ride' %}">
+    {% csrf_token %}
+    <label for="gender">Gender:</label>
+    <select id="gender" name="gender" required>
         <option value="" disabled selected hidden>Select Gender...</option>
-        <option value="any">Male</option>
-        <option value="male">Female</option>
-        <option value="female">Both</option>
-      </select>
+        <option value="any">Any</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select>
 
-      <label for="from">From :</label>
-      <input type="text" id="from" placeholder="Enter Pickup Location">
+    <label for="from">From:</label>
+    <input type="text" id="from" name="from" placeholder="Enter Pickup Location" required>
+    <input type="hidden" id="pickup_coords1" name="pickup_coords1">
+    <div id="from-suggestions1" class="autocomplete-suggestions"></div>
 
-      <label for="to">To :</label>
-      <input type="text" id="to" placeholder="Enter Destination">
+    <label for="to">To:</label>
+    <input type="text" id="to" name="to" placeholder="Enter Destination" required>
+    <input type="hidden" id="destination_coords1" name="destination_coords1">
+    <div id="to-suggestions1" class="autocomplete-suggestions"></div>
 
-      <label for="date">Date :</label>
-      <input type="date" id="date">
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" required>
 
-      <label for="time">Time :</label>
-      <input type="time" id="time">
+    <label for="time">Time:</label>
+    <input type="time" id="time" name="time" required>
 
-      <div class="btn-group">
-  <button type="submit" onclick="showAlert()">Search Rides</button>
-  
-</div>
-    </form>
-
+    <div class="btn-group">
+        <button type="submit">Search Rides</button>
+    </div>
+</form>
     
-    <form id="offerrideForm">
-      <label for="gender2">Gender :</label>
-      <select required>
+    <form id="offerrideForm" method="POST" action="{% url 'offer_ride' %}">
+    {% csrf_token %}
+    <label for="gender2">Gender:</label>
+    <select id="gender2" name="gender" required>
         <option value="" disabled selected hidden>Select Gender...</option>
-        <option value="any">Male</option>
-        <option value="male">Female</option>
-        <option value="female">Both</option>
-      </select>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="any">Both</option>
+    </select>
 
-      <label for="from2">From :</label>
-      <input type="text" id="from2" placeholder="Enter Pickup Location">
+    <label for="from2">Pickup:</label>
+    <input type="text" id="from2" name="pickup_address" placeholder="Enter Pickup Location" required>
+    <input type="hidden" id="pickup_coords" name="pickup_coords">
+    <div id="from-suggestions" class="autocomplete-suggestions"></div>
 
-      <label for="to2">To :</label>
-      <input type="text" id="to2" placeholder="Enter Destination">
+    <label for="to2">Destination:</label>
+    <input type="text" id="to2" name="destination_address" placeholder="Enter Destination" required>
+    <input type="hidden" id="destination_coords" name="destination_coords">
+    <div id="to-suggestions" class="autocomplete-suggestions"></div>
 
-      <label for="vehino">Vehicle Number :</label>
-      <input type="text" id="vehino" placeholder="Enter Vehicle Registration Number">
+    <label for="vehino">Vehicle Number:</label>
+    <input type="text" id="vehino" name="vehino" placeholder="Enter Vehicle Registration Number" required>
 
-      <label for="vehiname">Vehicle Model Name:</label>
-      <input type="text" id="vehiname" placeholder="Enter Vehicle Model Name">
+    <label for="vehiname">Vehicle Model Name:</label>
+    <input type="text" id="vehiname" name="vehiname" placeholder="Enter Vehicle Model Name" required>
 
-      <label for="date2">Date :</label>
-      <input type="date" id="date2">
+    <label for="vehicletype">Vehicle Type:</label>
+    <select id="vehicletype" name="vehicletype" required>
+        <option value="two-wheeler">Two-Wheeler</option>
+        <option value="four-wheeler">Four-Wheeler</option>
+    </select>
 
-      <label for="time2">Time :</label>
-      <input type="time" id="time2">
+    <label for="date2">Date:</label>
+    <input type="date" id="date2" name="date" required>
 
-      <label for="seats">Available Seats :</label>
-      <select id="seats">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-      </select>
+    <label for="time2">Time:</label>
+    <input type="time" id="time2" name="time" required>
 
-      <div class="btn-group">
-  <button type="submit">Post Ride</button>
-  
-</div>
-
-    </form>
+    <div class="btn-group">
+        <button type="submit">Post Ride</button>
+    </div>
+</form>
 
     
     
@@ -269,6 +304,168 @@
             alert("Please verify driver's id proof and vehicle's registration number same as mention");
         }
 </script>
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Check if Leaflet is loaded
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded');
+        return;
+    }
+
+    // Initialize the Nominatim geocoder
+    const geocoder = L.Control.Geocoder.nominatim();
+
+    // Reusable autocomplete function
+    function setupAutocomplete(inputId, suggestionsId, coordsId) {
+        const input = document.getElementById(inputId);
+        const suggestions = document.getElementById(suggestionsId);
+        const coords = document.getElementById(coordsId);
+        
+        if (!input || !suggestions || !coords) {
+            console.error(`Missing elements for ${inputId}`);
+            return;
+        }
+        
+        // Add loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.textContent = 'Loading...';
+        loadingIndicator.style.display = 'none';
+        suggestions.parentNode.insertBefore(loadingIndicator, suggestions);
+
+        input.addEventListener('input', function () {
+            const query = input.value.trim();
+            if (query.length > 2) { // Reduced from 3 to 2 for better UX
+                loadingIndicator.style.display = 'block';
+                
+                geocoder.geocode(query, function (results) {
+                    loadingIndicator.style.display = 'none';
+                    suggestions.innerHTML = '';
+                    
+                    if (results && results.length > 0) {
+                        suggestions.style.display = 'block';
+                        results.forEach(result => {
+                            const div = document.createElement('div');
+                            div.textContent = result.name;
+                            div.className = 'suggestion-item';
+                            div.addEventListener('click', function () {
+                                input.value = result.name;
+                                coords.value = `${result.center.lat},${result.center.lng}`;
+                                suggestions.innerHTML = '';
+                                suggestions.style.display = 'none';
+                                
+                                // Trigger change event in case other scripts need it
+                                input.dispatchEvent(new Event('change'));
+                            });
+                            suggestions.appendChild(div);
+                        });
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
+                }, function(error) {
+                    loadingIndicator.style.display = 'none';
+                    console.error('Geocoding error:', error);
+                    suggestions.innerHTML = '<div class="error-message">Error fetching locations</div>';
+                    suggestions.style.display = 'block';
+                });
+            } else {
+                suggestions.innerHTML = '';
+                suggestions.style.display = 'none';
+            }
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function (e) {
+            if (e.target !== input && !suggestions.contains(e.target)) {
+                suggestions.style.display = 'none';
+            }
+        });
+
+        // Hide suggestions when pressing Escape key
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                suggestions.style.display = 'none';
+            }
+        });
+    }
+
+    // Setup autocomplete for all location inputs
+    setupAutocomplete('from', 'from-suggestions1', 'pickup_coords1');
+    setupAutocomplete('to', 'to-suggestions1', 'destination_coords1');
+    setupAutocomplete('from2', 'from-suggestions', 'pickup_coords');
+    setupAutocomplete('to2', 'to-suggestions', 'destination_coords');
+
+    // Form validation
+    document.getElementById('findrideForm').addEventListener('submit', function (e) {
+        const pickupCoords = document.getElementById('pickup_coords1');
+        const destinationCoords = document.getElementById('destination_coords1');
+        
+        if (!pickupCoords.value || !destinationCoords.value) {
+            e.preventDefault();
+            alert('Please select valid pickup and destination locations from the suggestions.');
+        }
+    });
+
+    document.getElementById('offerrideForm').addEventListener('submit', function (e) {
+        const pickupCoords = document.getElementById('pickup_coords');
+        const destinationCoords = document.getElementById('destination_coords');
+        
+        if (!pickupCoords.value || !destinationCoords.value) {
+            e.preventDefault();
+            alert('Please select valid pickup and destination locations from the suggestions.');
+        }
+    });
+});
+</script>
+
+
+
+<style>
+.autocomplete-suggestions {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.suggestion-item:hover {
+    background-color: #f1f1f1;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.loading-indicator {
+    padding: 10px;
+    color: #666;
+    font-style: italic;
+}
+
+.error-message {
+    padding: 10px;
+    color: #d9534f;
+}
+
+/* Make sure the input position is relative for absolute positioning of suggestions */
+input[type="text"] {
+    position: relative;
+}
+</style>
 
 </body>
 </html>

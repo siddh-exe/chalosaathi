@@ -1,26 +1,27 @@
+# models.py
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
-
-# Create your models here.
-class UserProfile(AbstractUser):  
+    
+class UserProfile(AbstractUser):
     full_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15, unique=True)
     aadhaar = models.CharField(max_length=14, unique=True)
     gender = models.CharField(
         max_length=10,
-        choices=[("Male","Male"), ("Female","Female"), ("Other","Other")]
+        choices=[("Male", "Male"), ("Female", "Female"), ("Other", "Other")]
     )
-    avatar = models.ImageField(upload_to="avatars/", default="avatars/default.png")
-
-    # make email the username field
+    avatar = models.ImageField(upload_to="avatars/", default="default-avatar.png")
     email = models.EmailField(unique=True)
+    
+    # Override username to make it optional and non-unique
+    username = models.CharField(max_length=150, unique=False, blank=True, null=True)
 
-    USERNAME_FIELD = "email"   # authentication uses email
-    REQUIRED_FIELDS = ["username", "phone", "aadhaar"]  # still require these when creating a superuser
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["phone", "aadhaar"]
 
     def __str__(self):
-        return self.full_name
+        return self.full_name    
 
 class Feedback(models.Model):
     name = models.CharField(max_length=100)
@@ -30,3 +31,30 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.email}"
+
+class Ride(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    gender = models.CharField(
+        max_length=10,
+        choices=[("Male", "Male"), ("Female", "Female"), ("any", "Any")]
+    )
+    pickup = models.CharField(max_length=255)
+    pickup_coords = models.CharField(max_length=50, null=True, blank=True)
+    destination = models.CharField(max_length=255)
+    destination_coords = models.CharField(max_length=50, null=True, blank=True)  # Add this field
+    vehicle_number = models.CharField(max_length=50)
+    vehicle_model = models.CharField(max_length=100)
+    vehicle_type = models.CharField(max_length=20, choices=[("two-wheeler", "Two-Wheeler"), ("four-wheeler", "Four-Wheeler")])
+    date = models.DateField()
+    time = models.TimeField()
+    distance_km = models.FloatField()
+    cost = models.FloatField()
+    status = models.CharField(max_length=20, choices=[("active", "Active"), ("canceled", "Canceled")], default="active")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Add these fields for distance calculations
+    pickup_distance = models.FloatField(null=True, blank=True)
+    dest_distance = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.pickup} → {self.destination} by {self.user.email}"

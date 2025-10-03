@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Distance Calculator</title>
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAc9X7HGIVqW3h6ccPMOc6uFFqLTGDQF9k&libraries=places&callback=initMap">
+  </script>
+  <style>
+    #map { height: 400px; width: 100%; margin-top: 10px; }
+    #panel { margin: 10px; }
+    input { padding: 5px; margin: 5px; width: 250px; }
+    button { padding: 5px 10px; }
+  </style>
+  <script>
+    let map, service, originInput, destinationInput;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 18.5204, lng: 73.8567 }, // Pune default
+        zoom: 7
+      });
+
+      service = new google.maps.DistanceMatrixService();
+
+      // Input fields
+      originInput = document.getElementById("origin");
+      destinationInput = document.getElementById("destination");
+
+      // Add Google Places Autocomplete
+      new google.maps.places.Autocomplete(originInput);
+      new google.maps.places.Autocomplete(destinationInput);
+    }
+
+    function calculateDistance() {
+      let origin = originInput.value;
+      let destination = destinationInput.value;
+
+      if (!origin || !destination) {
+        alert("Please enter both locations.");
+        return;
+      }
+
+      service.getDistanceMatrix(
+        {
+          origins: [origin],
+          destinations: [destination],
+          travelMode: "DRIVING"
+        },
+        function (response, status) {
+          if (status === "OK") {
+            let distance = response.rows[0].elements[0].distance.text;
+            let duration = response.rows[0].elements[0].duration.text;
+
+            document.getElementById("output").innerHTML =
+              `<b>Distance:</b> ${distance} <br> <b>Duration:</b> ${duration}`;
+
+            // Place markers on map
+            let originLocation = response.originAddresses[0];
+            let destLocation = response.destinationAddresses[0];
+
+            let geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: originLocation }, function (results, status) {
+              if (status === "OK") {
+                new google.maps.marker.AdvancedMarkerElement({
+                  position: results[0].geometry.location,
+                  map: map,
+                  title: "Origin"
+                });
+              }
+            });
+
+            geocoder.geocode({ address: destLocation }, function (results, status) {
+              if (status === "OK") {
+                new google.maps.marker.AdvancedMarkerElement({
+                  position: results[0].geometry.location,
+                  map: map,
+                  title: "Destination"
+                });
+                map.setCenter(results[0].geometry.location);
+              }
+            });
+
+          } else {
+            alert("Error: " + status);
+          }
+        }
+      );
+    }
+  </script>
+</head>
+<body>
+  <h2>Google Maps Distance Calculator</h2>
+  <div id="panel">
+    <input id="origin" type="text" placeholder="Enter starting location">
+    <input id="destination" type="text" placeholder="Enter destination">
+    <button onclick="calculateDistance()">Get Distance</button>
+  </div>
+  <div id="output"></div>
+  <div id="map"></div>
+</body>
+</html>
