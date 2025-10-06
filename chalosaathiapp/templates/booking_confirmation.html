@@ -1,0 +1,125 @@
+<!-- templates/booking_confirmation.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - ChaloSaathi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 60px;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .booking-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 150px;
+        }
+        .detail-value {
+            flex: 1;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .contact-info {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✓</div>
+        <h1>Booking Confirmed!</h1>
+        <p>Your booking request has been sent to the driver. You will receive a confirmation once the driver accepts your request.</p>
+        
+        <div class="booking-details">
+            <h3>Booking Details</h3>
+            <div class="detail-row">
+                <div class="detail-label">Booking ID:</div>
+                <div class="detail-value">#{{ booking.id }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Route:</div>
+                <div class="detail-value">{{ booking.ride.pickup }} → {{ booking.ride.destination }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Date:</div>
+                <div class="detail-value">{{ booking.ride.date }} at {{ booking.ride.time }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Driver:</div>
+                <div class="detail-value">
+                    {% if booking.ride.user.get_full_name %}
+                        {{ booking.ride.user.get_full_name }}
+                    {% else %}
+                        {{ booking.ride.user.email }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value">{{ booking.get_status_display }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Pickup Location:</div>
+                <div class="detail-value">{{ booking.pickup_location }}</div>
+            </div>
+        </div>
+        
+        <div class="contact-info">
+            <h3>What's Next?</h3>
+            <p>The driver will contact you using your email address to confirm the booking details.</p>
+            <p>Make sure to check your email regularly for updates about your booking.</p>
+        </div>
+        
+        <a href="{% url 'ride_results' %}" class="btn">Find More Rides</a>
+        <a href="{% url 'my_bookings' %}" class="btn">View My Bookings</a>
+    </div>
+</body>
+</html>

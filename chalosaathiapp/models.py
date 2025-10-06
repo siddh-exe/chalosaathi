@@ -58,3 +58,25 @@ class Ride(models.Model):
 
     def __str__(self):
         return f"{self.pickup} → {self.destination} by {self.user.email}"
+    
+# models.py
+# models.py
+class Booking(models.Model):
+    ride = models.ForeignKey(Ride, on_delete=models.CASCADE, related_name='bookings')
+    passenger = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bookings')
+    booking_time = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("pending", "Pending"),
+            ("confirmed", "Confirmed"),
+            ("canceled", "Canceled")
+        ],
+        default="pending"
+    )
+    pickup_location = models.CharField(max_length=255, blank=True)  # Made optional
+    contact_number = models.CharField(max_length=20, blank=True)   # Made optional
+    message = models.TextField(blank=True)                         # Made optional
+    
+    def __str__(self):
+        return f"Booking by {self.passenger.email} for {self.ride}"

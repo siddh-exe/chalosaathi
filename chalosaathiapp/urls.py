@@ -28,11 +28,15 @@ urlpatterns = [
     path('offer-ride/', views.offer_ride, name='offer_ride'),
     path('find-ride/', views.find_ride, name='find_ride'),
     path('ride-results/', views.ride_results, name='ride_results'),
+    path('book-ride/<int:ride_id>/', views.book_ride, name='book_ride'),
+    path('booking-confirmation/<int:booking_id>/', views.booking_confirmation, name='booking_confirmation'),
+    path('my-bookings/', views.my_bookings, name='my_bookings'),
+]
     
 
    
 
-]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

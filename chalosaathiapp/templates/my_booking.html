@@ -1,0 +1,48 @@
+<!-- templates/my_bookings.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - ChaloSaathi</title>
+    <!-- ... existing styles ... -->
+</head>
+<body>
+    <div class="container">
+        <h1>My Bookings</h1>
+        
+        {% if bookings %}
+            {% for booking in bookings %}
+            <div class="booking-card">
+                <div class="booking-header">
+                    <div>
+                        <h3>{{ booking.ride.pickup }} → {{ booking.ride.destination }}</h3>
+                        <p>Date: {{ booking.ride.date }} at {{ booking.ride.time }}</p>
+                        <p>Driver: 
+                            {% if booking.ride.user.get_full_name %}
+                                {{ booking.ride.user.get_full_name }}
+                            {% else %}
+                                {{ booking.ride.user.email }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                    </div>
+                </div>
+                
+                <p>Booking ID: #{{ booking.id }}</p>
+                <p>Booked on: {{ booking.booking_time|date:"d M Y, H:i" }}</p>
+                
+                {% if booking.status == 'pending' %}
+                <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger">Cancel Booking</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>You haven't made any bookings yet.</p>
+            <a href="{% url 'find_ride' %}" class="btn">Find Rides</a>
+        {% endif %}
+    </div>
+</body>
+</html>

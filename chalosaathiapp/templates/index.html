@@ -94,94 +94,95 @@
     </div>
   </div>
   </div>
-  <button type="button" class="toggle-btn" onclick="toggleForm()">Publish your Ride</button>
-  <div class="container">
-    
+  <div class="toggle-container">
+        <div class="toggle-slider">
+            <div class="toggle-indicator" id="toggleIndicator"></div>
+            <div class="toggle-option active" id="findOption" onclick="showFindRide()">Find a Ride</div>
+            <div class="toggle-option" id="publishOption" onclick="showPublishRide()">Publish Your Ride</div>
+        </div>
+    </div>
+
+
+<div class="container">
   <div id="ride-card" class="card">
     <h2 id="formTitle">Find a Ride</h2>
 
-   <form id="findrideForm" class="active" method="POST" action="{% url 'find_ride' %}">
-    {% csrf_token %}
-    <label for="gender">Gender:</label>
-    <select id="gender" name="gender" required>
+    <form id="findrideForm" class="active" method="POST" action="{% url 'find_ride' %}">
+      {% csrf_token %}
+      <label for="gender">Gender:</label>
+      <select id="gender" name="gender" required>
         <option value="" disabled selected hidden>Select Gender...</option>
         <option value="any">Any</option>
         <option value="male">Male</option>
         <option value="female">Female</option>
-    </select>
+      </select>
 
-    <label for="from">From:</label>
-    <input type="text" id="from" name="from" placeholder="Enter Pickup Location" required>
-    <input type="hidden" id="pickup_coords1" name="pickup_coords1">
-    <div id="from-suggestions1" class="autocomplete-suggestions"></div>
+      <label for="from">From:</label>
+      <input type="text" id="from" name="from" placeholder="Enter Pickup Location" required>
+      <input type="hidden" id="pickup_coords1" name="pickup_coords1">
+      <div id="from-suggestions1" class="autocomplete-suggestions"></div>
 
-    <label for="to">To:</label>
-    <input type="text" id="to" name="to" placeholder="Enter Destination" required>
-    <input type="hidden" id="destination_coords1" name="destination_coords1">
-    <div id="to-suggestions1" class="autocomplete-suggestions"></div>
+      <label for="to">To:</label>
+      <input type="text" id="to" name="to" placeholder="Enter Destination" required>
+      <input type="hidden" id="destination_coords1" name="destination_coords1">
+      <div id="to-suggestions1" class="autocomplete-suggestions"></div>
 
-    <label for="date">Date:</label>
-    <input type="date" id="date" name="date" required>
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required>
 
-    <label for="time">Time:</label>
-    <input type="time" id="time" name="time" required>
+      <label for="time">Time:</label>
+      <input type="time" id="time" name="time" required>
 
-    <div class="btn-group">
+      <div class="btn-group">
         <button type="submit">Search Rides</button>
-    </div>
-</form>
+      </div>
+    </form>
     
     <form id="offerrideForm" method="POST" action="{% url 'offer_ride' %}">
-    {% csrf_token %}
-    <label for="gender2">Gender:</label>
-    <select id="gender2" name="gender" required>
+      {% csrf_token %}
+      <label for="gender2">Gender:</label>
+      <select id="gender2" name="gender" required>
         <option value="" disabled selected hidden>Select Gender...</option>
         <option value="male">Male</option>
         <option value="female">Female</option>
         <option value="any">Both</option>
-    </select>
+      </select>
 
-    <label for="from2">Pickup:</label>
-    <input type="text" id="from2" name="pickup_address" placeholder="Enter Pickup Location" required>
-    <input type="hidden" id="pickup_coords" name="pickup_coords">
-    <div id="from-suggestions" class="autocomplete-suggestions"></div>
+      <label for="from2">Pickup:</label>
+      <input type="text" id="from2" name="pickup_address" placeholder="Enter Pickup Location" required>
+      <input type="hidden" id="pickup_coords" name="pickup_coords">
+      <div id="from-suggestions" class="autocomplete-suggestions"></div>
 
-    <label for="to2">Destination:</label>
-    <input type="text" id="to2" name="destination_address" placeholder="Enter Destination" required>
-    <input type="hidden" id="destination_coords" name="destination_coords">
-    <div id="to-suggestions" class="autocomplete-suggestions"></div>
+      <label for="to2">Destination:</label>
+      <input type="text" id="to2" name="destination_address" placeholder="Enter Destination" required>
+      <input type="hidden" id="destination_coords" name="destination_coords">
+      <div id="to-suggestions" class="autocomplete-suggestions"></div>
 
-    <label for="vehino">Vehicle Number:</label>
-    <input type="text" id="vehino" name="vehino" placeholder="Enter Vehicle Registration Number" required>
+      <label for="vehino">Vehicle Number:</label>
+      <input type="text" id="vehino" name="vehino" placeholder="Enter Vehicle Registration Number" required>
 
-    <label for="vehiname">Vehicle Model Name:</label>
-    <input type="text" id="vehiname" name="vehiname" placeholder="Enter Vehicle Model Name" required>
+      <label for="vehiname">Vehicle Model Name:</label>
+      <input type="text" id="vehiname" name="vehiname" placeholder="Enter Vehicle Model Name" required>
 
-    <label for="vehicletype">Vehicle Type:</label>
-    <select id="vehicletype" name="vehicletype" required>
+      <label for="vehicletype">Vehicle Type:</label>
+      <select id="vehicletype" name="vehicletype" required>
         <option value="two-wheeler">Two-Wheeler</option>
         <option value="four-wheeler">Four-Wheeler</option>
-    </select>
+      </select>
 
-    <label for="date2">Date:</label>
-    <input type="date" id="date2" name="date" required>
+      <label for="date2">Date:</label>
+      <input type="date" id="date2" name="date" required>
 
-    <label for="time2">Time:</label>
-    <input type="time" id="time2" name="time" required>
+      <label for="time2">Time:</label>
+      <input type="time" id="time2" name="time" required>
 
-    <div class="btn-group">
+      <div class="btn-group">
         <button type="submit">Post Ride</button>
-    </div>
-</form>
-
-    
-    
+      </div>
+    </form>
   </div>
 </div>
-
-
     <div class="divider"></div>
-
     <section>
       <h1>Our Other Platforms</h1>
 
@@ -278,32 +279,47 @@
         </p>
       </div>
     </footer>
-    <script>
-  let isFindRide = true;
-  function toggleForm() {
-    const findForm = document.getElementById("findrideForm");
-    const offerForm = document.getElementById("offerrideForm");
-    const formTitle = document.getElementById("formTitle");
-    const toggleBtn = document.querySelector(".toggle-btn");
+   
+<script>
+        function showFindRide() {
+            const findForm = document.getElementById("findrideForm");
+            const offerForm = document.getElementById("offerrideForm");
+            const formTitle = document.getElementById("formTitle");
+            const findOption = document.getElementById("findOption");
+            const publishOption = document.getElementById("publishOption");
+            const toggleIndicator = document.getElementById("toggleIndicator");
 
-    if (isFindRide) {
-      findForm.classList.remove("active");
-      offerForm.classList.add("active");
-      formTitle.textContent = "Publish Your Ride";
-      toggleBtn.textContent = "Find a Ride";
-    } else {
-      offerForm.classList.remove("active");
-      findForm.classList.add("active");
-      formTitle.textContent = "Find a Ride";
-      toggleBtn.textContent = "Publish Your Ride";
-    }
+            findForm.classList.add("active");
+            offerForm.classList.remove("active");
+            formTitle.textContent = "Find a Ride";
+            
+            findOption.classList.add("active");
+            publishOption.classList.remove("active");
+            toggleIndicator.classList.remove("publish");
+        }
 
-    isFindRide = !isFindRide;
-  }
-  function showAlert() {
+        function showPublishRide() {
+            const findForm = document.getElementById("findrideForm");
+            const offerForm = document.getElementById("offerrideForm");
+            const formTitle = document.getElementById("formTitle");
+            const findOption = document.getElementById("findOption");
+            const publishOption = document.getElementById("publishOption");
+            const toggleIndicator = document.getElementById("toggleIndicator");
+
+            findForm.classList.remove("active");
+            offerForm.classList.add("active");
+            formTitle.textContent = "Publish Your Ride";
+            
+            findOption.classList.remove("active");
+            publishOption.classList.add("active");
+            toggleIndicator.classList.add("publish");
+        }
+
+        function showAlert() {
             alert("Please verify driver's id proof and vehicle's registration number same as mention");
         }
-</script>
+    </script>
+
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
 <script>

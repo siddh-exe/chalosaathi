@@ -18,7 +18,12 @@ from django.conf import settings
 
 from django.contrib.gis.measure import D
 from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404
 
+
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from .models import Ride, Booking
 
 # Create your views here.
 def index(request):
@@ -437,12 +442,12 @@ def find_ride(request):
             all_rides = all_rides.filter(gender=gender)
         
         # Filter by date (rides on the same day or after)
-        if date:
-            try:
-                search_date = datetime.strptime(date, "%Y-%m-%d").date()
-                all_rides = all_rides.filter(date__gte=search_date)
-            except ValueError:
-                pass
+        # if date:
+        #     try:
+        #         search_date = datetime.strptime(date, "%Y-%m-%d").date()
+        #         all_rides = all_rides.filter(date__gte=search_date)
+        #     except ValueError:
+        #         pass
         
         # Calculate distances and filter by route similarity
         matching_rides = []
@@ -487,3 +492,61 @@ def find_ride(request):
         })
     
     return render(request, "index.html")
+
+
+
+
+
+@login_required
+def book_ride(request, ride_id):
+    ride = get_object_or_404(Ride, id=ride_id)
+    
+    # Check if user has already booked this ride
+    if Booking.objects.filter(ride=ride, passenger=request.user).exists():
+        messages.error(request, 'You have already booked this ride.')
+        return redirect('ride_results')
+    
+    # Create booking directly without form
+    booking = Booking.objects.create(
+        ride=ride,
+        passenger=request.user,
+        pickup_location=ride.pickup,  # Use ride's pickup location
+        status='pending'
+    )
+    
+    # Send email to ride publisher
+    send_booking_notification_email(booking)
+    
+    messages.success(request, 'Your booking has been submitted successfully! The driver will contact you soon.')
+    return redirect('booking_confirmation', booking_id=booking.id)
+
+def send_booking_notification_email(booking):
+    subject = f'New Booking Request - {booking.ride.pickup} to {booking.ride.destination}'
+    
+    html_message = render_to_string('emails/booking_notification.html', {
+        'booking': booking,
+        'ride': booking.ride,
+        'passenger': booking.passenger,
+    })
+    
+    plain_message = strip_tags(html_message)
+    
+    send_mail(
+        subject,
+        plain_message,
+        settings.DEFAULT_FROM_EMAIL,
+        [booking.ride.user.email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+@login_required
+def booking_confirmation(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, passenger=request.user)
+    return render(request, 'booking_confirmation.html', {'booking': booking})
+
+# views.py
+@login_required
+def my_bookings(request):
+    bookings = Booking.objects.filter(passenger=request.user).order_by('-booking_time')
+    return render(request, 'my_booking.html', {'bookings': bookings})

@@ -261,7 +261,9 @@
                         </div>
                     </div>
                     
-                    <a href="#" class="btn btn-book" onclick="bookRide({{ ride.id }}); return false;">Book This Ride</a>
+                   
+<a href="{% url 'book_ride' ride.id %}" class="btn btn-book" 
+   onclick="return confirm('Are you sure you want to book this ride?')">Book This Ride</a>
                 </div>
                 {% endfor %}
             </div>
