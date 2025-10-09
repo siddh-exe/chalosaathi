@@ -31,6 +31,12 @@ urlpatterns = [
     path('book-ride/<int:ride_id>/', views.book_ride, name='book_ride'),
     path('booking-confirmation/<int:booking_id>/', views.booking_confirmation, name='booking_confirmation'),
     path('my-bookings/', views.my_bookings, name='my_bookings'),
+    path('ride/<int:ride_id>/bookings/', views.ride_bookings, name='ride_bookings'),
+    path('booking/confirm/<int:booking_id>/', views.confirm_booking, name='confirm_booking'),
+    path('booking/cancel/<int:booking_id>/', views.cancel_booking_driver, name='cancel_booking_driver'),
+    path('choose-subscription/<int:booking_id>/', views.choose_subscription, name='choose_subscription'),
+    
+    
 ]
     
 

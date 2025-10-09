@@ -20,11 +20,15 @@ from django.contrib.gis.measure import D
 from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404
 
-
+from django.utils import timezone
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from .models import Ride, Booking
-
+from django.db import transaction
+from celery import shared_task
+from django.utils.html import strip_tags
+import logging
+from .tasks import send_booking_status_notification_email, send_booking_notification_email
 # Create your views here.
 def index(request):
      user_name = request.session.get('full_name')  # None if not logged in
@@ -77,21 +81,25 @@ def delete_ride(request, ride_id):
 
 
 
+logger = logging.getLogger(__name__)
+
 @login_required
 def ride_results(request):
+    logger.info(f"ride_results called with session={request.session.get('search_params', {})}")
     search_params = request.session.get('search_params', {})
     if not search_params:
+        logger.warning("No search_params in session, redirecting to find_ride")
         return redirect('find_ride')
 
     user_gender = request.user.gender
     if not user_gender:
+        logger.warning("No user gender, rendering with error")
         return render(request, 'ride_results.html', {'error': 'Please specify your gender in your profile.'})
 
     pickup_lat, pickup_lon = map(float, search_params['pickup_coords'].split(','))
     date = search_params['date']
     distance_filter = float(request.GET.get('distance', 2.0))  # Default to 2km
 
-    # Filter active rides by gender and date
     rides = Ride.objects.filter(status='active', date=date)
     if user_gender == 'Male':
         rides = rides.filter(gender__in=['Male', 'any'])
@@ -100,10 +108,9 @@ def ride_results(request):
     else:  # 'Other' users see 'any' rides
         rides = rides.filter(gender='any')
 
-    # Calculate distances and filter
     filtered_rides = []
     for ride in rides:
-        if not ride.pickup_coords:  # Skip rides without coordinates
+        if not ride.pickup_coords:
             continue
         try:
             ride_lat, ride_lon = map(float, ride.pickup_coords.split(','))
@@ -116,8 +123,9 @@ def ride_results(request):
                     'cost_per_ride': round(cost_per_ride, 2),
                 })
         except (ValueError, AttributeError):
-            continue  # Skip rides with invalid coordinates
+            continue
 
+    logger.info(f"Rendering ride_results with {len(filtered_rides)} rides")
     return render(request, 'ride_results.html', {
         'rides': filtered_rides,
         'distance_filter': distance_filter,
@@ -495,58 +503,162 @@ def find_ride(request):
 
 
 
-
-
 @login_required
 def book_ride(request, ride_id):
-    ride = get_object_or_404(Ride, id=ride_id)
-    
-    # Check if user has already booked this ride
-    if Booking.objects.filter(ride=ride, passenger=request.user).exists():
-        messages.error(request, 'You have already booked this ride.')
-        return redirect('ride_results')
-    
-    # Create booking directly without form
-    booking = Booking.objects.create(
-        ride=ride,
-        passenger=request.user,
-        pickup_location=ride.pickup,  # Use ride's pickup location
-        status='pending'
-    )
-    
-    # Send email to ride publisher
-    send_booking_notification_email(booking)
-    
-    messages.success(request, 'Your booking has been submitted successfully! The driver will contact you soon.')
-    return redirect('booking_confirmation', booking_id=booking.id)
+    logger.info(f"book_ride called with ride_id={ride_id}, method={request.method}, POST={request.POST}")
 
-def send_booking_notification_email(booking):
-    subject = f'New Booking Request - {booking.ride.pickup} to {booking.ride.destination}'
-    
-    html_message = render_to_string('emails/booking_notification.html', {
-        'booking': booking,
-        'ride': booking.ride,
-        'passenger': booking.passenger,
-    })
-    
-    plain_message = strip_tags(html_message)
-    
-    send_mail(
-        subject,
-        plain_message,
-        settings.DEFAULT_FROM_EMAIL,
-        [booking.ride.user.email],
-        html_message=html_message,
-        fail_silently=False,
-    )
+    if request.method != 'POST':
+        messages.error(request, 'Invalid request method. Please use the booking form.')
+        logger.warning("Redirecting to ride_results due to GET request")
+        return redirect('ride_results')
+
+    with transaction.atomic():
+        # Lock ride row to avoid race conditions
+        ride = get_object_or_404(
+            Ride.objects.select_for_update(),
+            id=ride_id,
+            status='active'
+        )
+
+        # Prevent booking own ride
+        if ride.user == request.user:
+            messages.error(request, 'You cannot book your own ride.')
+            logger.warning("Redirecting to ride_results due to self-booking")
+            return redirect('ride_results')
+
+        # Check ride time (safer handling if already aware)
+        ride_datetime = datetime.combine(ride.date, ride.time)
+        if timezone.is_naive(ride_datetime):
+            ride_datetime = timezone.make_aware(ride_datetime)
+
+        if ride_datetime < timezone.now():
+            messages.error(request, 'This ride has already occurred.')
+            logger.warning("Redirecting to ride_results due to past ride")
+            return redirect('ride_results')
+
+        # Gender validation
+        gender = request.POST.get('gender') or getattr(request.user, 'gender', None)
+        if not gender:
+            messages.error(request, 'Your profile must include gender information to book rides.')
+            logger.warning("Redirecting to ride_results due to missing gender")
+            return redirect('ride_results')
+
+        logger.info(f"Gender check: user={gender}, ride={ride.gender}")
+        if ride.gender != 'any' and ride.gender != gender:
+            messages.error(request, 'You do not meet the gender preference for this ride.')
+            logger.warning("Redirecting to ride_results due to gender mismatch")
+            return redirect('ride_results')
+
+        # Prevent duplicate booking
+        if Booking.objects.filter(ride=ride, passenger=request.user).exists():
+            messages.error(request, 'You have already booked this ride.')
+            logger.warning("Redirecting to ride_results due to duplicate booking")
+            return redirect('ride_results')
+
+        # Seat availability check
+        current_bookings = Booking.objects.filter(ride=ride).count()
+        if hasattr(ride, 'available_seats') and current_bookings >= ride.available_seats:
+            messages.error(request, 'This ride is fully booked.')
+            logger.warning("Redirecting to ride_results due to no available seats")
+            return redirect('ride_results')
+
+        # Contact number check
+        contact_number = getattr(request.user, 'phone', '')
+        if not contact_number:
+            messages.error(request, 'You must add a phone number to your profile before booking a ride.')
+            logger.warning("Redirecting to profile page due to missing phone")
+            return redirect('profile')  # Assuming you have a profile page
+
+        # Create booking
+        booking = Booking.objects.create(
+            ride=ride,
+            passenger=request.user,
+            pickup_location=ride.pickup,
+            status='pending',
+            contact_number=contact_number,
+            message=request.POST.get('message', '')
+        )
+
+        # Send async email
+        send_booking_notification_email.delay(booking.id)
+        logger.info(f"Booking created, redirecting to choose_subscription with booking_id={booking.id}")
+
+    return redirect('choose_subscription', booking_id=booking.id)
+
 
 @login_required
 def booking_confirmation(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, passenger=request.user)
     return render(request, 'booking_confirmation.html', {'booking': booking})
 
-# views.py
+
 @login_required
 def my_bookings(request):
     bookings = Booking.objects.filter(passenger=request.user).order_by('-booking_time')
     return render(request, 'my_booking.html', {'bookings': bookings})
+
+@login_required
+def ride_bookings(request, ride_id):
+    ride = get_object_or_404(Ride, id=ride_id, user=request.user)
+    bookings = Booking.objects.filter(ride=ride).select_related('passenger').order_by('-booking_time')
+    return render(request, 'ride_bookings.html', {
+        'ride': ride,
+        'bookings': bookings,
+    })
+
+@login_required
+def confirm_booking(request, booking_id):
+    with transaction.atomic():
+        booking = get_object_or_404(Booking, id=booking_id, ride__user=request.user)
+        if booking.status == 'pending':
+            booking.status = 'confirmed'
+            booking.save()
+            # Call synchronously for development (no .delay())
+            send_booking_status_notification_email(booking.id, 'confirmed')
+            messages.success(request, 'Booking confirmed successfully.')
+        else:
+            messages.error(request, 'Booking cannot be confirmed.')
+    return redirect('ride_bookings', ride_id=booking.ride.id)
+
+@login_required
+def cancel_booking_driver(request, booking_id):
+    with transaction.atomic():
+        booking = get_object_or_404(Booking, id=booking_id, ride__user=request.user)
+        if booking.status != 'canceled':
+            booking.status = 'canceled'
+            booking.save()
+            # Call synchronously for development (no .delay())
+            send_booking_status_notification_email(booking.id, 'canceled')
+            messages.success(request, 'Booking canceled successfully.')
+        else:
+            messages.error(request, 'Booking is already canceled.')
+    return redirect('ride_bookings', ride_id=booking.ride.id)
+
+@login_required
+def choose_subscription(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, passenger=request.user, status='pending')
+    ride = booking.ride
+    base_cost = ride.cost  # Use the ride's cost as the base price
+
+    # Calculate subscription prices (example rates based on ride cost)
+    weekly_cost = base_cost * 1.5   # 50% extra for 7 rides
+    monthly_cost = base_cost * 5    # 5x base for 30 rides
+    quarterly_cost = base_cost * 14  # 14x base for 90 rides
+
+    if request.method == 'POST':
+        subscription_type = request.POST.get('subscription_type')
+        if subscription_type in ['weekly', 'monthly', 'quarterly']:
+            booking.subscription_type = subscription_type
+            booking.status = 'confirmed'  # Confirm the booking upon selection
+            booking.save()
+            messages.success(request, f'Booking confirmed with {subscription_type} subscription!')
+            return redirect('booking_confirmation', booking_id=booking.id)
+        messages.error(request, 'Invalid subscription option.')
+
+    return render(request, 'subscription_options.html', {
+        'booking': booking,
+        'ride': ride,
+        'weekly_cost': round(weekly_cost, 2),
+        'monthly_cost': round(monthly_cost, 2),
+        'quarterly_cost': round(quarterly_cost, 2),
+    })

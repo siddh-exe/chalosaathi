@@ -141,3 +141,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'no.reply.info.chalosaathi@gmail.com'   # your email
 EMAIL_HOST_PASSWORD = 'mkig oeja xksq snpj'  # use App Password, not normal password
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis as the broker
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Store task results
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'  # Set to IST
+CELERY_TASK_EAGER_PROPAGATES = True  # For debugging in development
+

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Booking Notification</title>
+    <title>Booking Status Update</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -55,32 +55,16 @@
             border-top: 1px solid #eeeeee;
             margin-top: 20px;
         }
-        .btn {
-            display: inline-block;
-            background-color: #27ae60;
-            color: #ffffff;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background-color: #219a52;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>New Booking Request</h1>
+            <h1>Booking {{ status }}</h1>
         </div>
         <div class="content">
-            <h2>Booking Details</h2>
-            <p><span class="detail-label">Passenger Name:</span> {{ passenger_name }}</p>
-            <p><span class="detail-label">Passenger Email:</span> {{ passenger_email }}</p>
-            <p><span class="detail-label">Passenger Phone:</span> {{ passenger_phone }}</p>
-            <p><span class="detail-label">Booking Status:</span> {{ booking.status|title }}</p>
-            <p><span class="detail-label">Message:</span> {{ booking.message|default:"None" }}</p>
+            <p>Dear {{ passenger_name }},</p>
+            <p>Your booking for the ride from {{ ride.pickup }} to {{ ride.destination }} has been {{ status }}.</p>
             
             <h2>Ride Details</h2>
             <p><span class="detail-label">Route:</span> {{ ride.pickup }} to {{ ride.destination }}</p>
@@ -89,11 +73,13 @@
             <p><span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }} ({{ ride.vehicle_number }})</p>
             <p><span class="detail-label">Vehicle Type:</span> {{ ride.get_vehicle_type_display }}</p>
             <p><span class="detail-label">Cost:</span> ₹{{ ride.cost }}</p>
-            <p><span class="detail-label">Distance:</span> {{ ride.distance_km }} km</p>
-            <p><span class="detail-label">Gender Preference:</span> {{ ride.get_gender_display }}</p>
+            <p><span class="detail-label">Driver:</span> {{ ride.user.username }}</p>
             
-            <p>Please contact the passenger to confirm or discuss the booking details.</p>
-            <a href="{% url 'driver_bookings' %}" class="btn">View All Bookings</a>
+            {% if status == "Confirmed" %}
+                <p>Please contact the driver to coordinate pickup details.</p>
+            {% else %}
+                <p>We’re sorry, but this booking has been canceled. Please search for another ride.</p>
+            {% endif %}
         </div>
         <div class="footer">
             <p>This email was sent by the Ride Sharing Platform.</p>

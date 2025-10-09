@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Requests for Ride</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .ride-details {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .booking-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .booking-item:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 5px;
+        }
+        .btn-confirm {
+            background: #27ae60;
+        }
+        .btn-confirm:hover {
+            background: #219a52;
+        }
+        .btn-cancel {
+            background: #e63946;
+        }
+        .btn-cancel:hover {
+            background: #c82333;
+        }
+        .btn-back {
+            background: #3498db;
+        }
+        .btn-back:hover {
+            background: #2980b9;
+        }
+        .no-bookings {
+            color: #777;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'profile' %}" class="btn btn-back">← Back to Profile</a>
+        <h1>Booking Requests for Ride</h1>
+        
+        <div class="ride-details">
+            <h2>Ride Details</h2>
+            <p><span class="detail-label">Route:</span> {{ ride.pickup }} to {{ ride.destination }}</p>
+            <p><span class="detail-label">Date:</span> {{ ride.date }}</p>
+            <p><span class="detail-label">Time:</span> {{ ride.time }}</p>
+            <p><span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }} ({{ ride.vehicle_number }})</p>
+            <p><span class="detail-label">Cost:</span> ₹{{ ride.cost }}</p>
+            <p><span class="detail-label">Status:</span> {{ ride.status|capfirst }}</p>
+        </div>
+        
+        <h2>Bookings</h2>
+        {% if bookings %}
+            {% for booking in bookings %}
+                <div class="booking-item">
+                    <p><span class="detail-label">Passenger:</span> {{ booking.passenger.get_full_name|default:booking.passenger.username }}</p>
+                    <p><span class="detail-label">Email:</span> {{ booking.passenger.email }}</p>
+                    <p><span class="detail-label">Phone:</span> {{ booking.contact_number|default:"Not provided" }}</p>
+                    <p><span class="detail-label">Pickup Location:</span> {{ booking.pickup_location|default:ride.pickup }}</p>
+                    <p><span class="detail-label">Status:</span> {{ booking.status|capfirst }}</p>
+                    <p><span class="detail-label">Booked On:</span> {{ booking.booking_time }}</p>
+                    <p><span class="detail-label">Message:</span> {{ booking.message|default:"None" }}</p>
+                    {% if booking.status == "pending" %}
+                        <a href="{% url 'confirm_booking' booking.id %}" class="btn btn-confirm" onclick="return confirm('Confirm this booking?')">Confirm</a>
+                        <a href="{% url 'cancel_booking_driver' booking.id %}" class="btn btn-cancel" onclick="return confirm('Cancel this booking?')">Cancel</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-bookings">No booking requests for this ride.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

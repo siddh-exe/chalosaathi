@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Choose a Subscription Plan</h2>
+    <p>For your ride from {{ ride.pickup }} to {{ ride.destination }}</p>
+    {% if booking.message %}
+        <p><strong>Message:</strong> {{ booking.message }}</p>
+    {% endif %}
+    <form method="post" action="{% url 'choose_subscription' booking.id %}">
+        {% csrf_token %}
+        <div class="subscription-options">
+            <div class="option">
+                <h3>Weekly</h3>
+                <p>₹{{ weekly_cost }} for 7 rides</p>
+                <button type="submit" name="subscription_type" value="weekly">Select Weekly</button>
+            </div>
+            <div class="option">
+                <h3>Monthly</h3>
+                <p>₹{{ monthly_cost }} for 30 rides</p>
+                <button type="submit" name="subscription_type" value="monthly">Select Monthly</button>
+            </div>
+            <div class="option">
+                <h3>Quarterly</h3>
+                <p>₹{{ quarterly_cost }} for 90 rides</p>
+                <button type="submit" name="subscription_type" value="quarterly">Select Quarterly</button>
+            </div>
+        </div>
+    </form>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

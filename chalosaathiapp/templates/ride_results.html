@@ -224,48 +224,48 @@
             
             <div id="rides-container">
                 {% for ride in rides %}
-                <div class="ride-card" 
-                     data-ride-id="{{ ride.id }}" 
-                     data-distance-km="{% if ride.pickup_distance %}{{ ride.pickup_distance }}{% else %}0{% endif %}">
-                    <div class="ride-header">
-                        <div class="route">{{ ride.pickup }} → {{ ride.destination }}</div>
-                        <div class="price">₹{{ ride.cost }}</div>
-                    </div>
-                    
-                    <div class="ride-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Driver:</span> {{ ride.user.username }}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Date:</span> {{ ride.date }}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Time:</span> {{ ride.time }}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Type:</span> {{ ride.get_vehicle_type_display }}
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Distance:</span> {{ ride.distance_km }} km
-                        </div>
-                        {% if ride.pickup_distance %}
-                        <div class="detail-item">
-                            <span class="detail-label">Pickup Distance:</span> {{ ride.pickup_distance }} km
-                        </div>
-                        {% endif %}
-                        <div class="detail-item">
-                            <span class="detail-label">Gender Preference:</span> {{ ride.get_gender_display }}
-                        </div>
-                    </div>
-                    
-                   
-<a href="{% url 'book_ride' ride.id %}" class="btn btn-book" 
-   onclick="return confirm('Are you sure you want to book this ride?')">Book This Ride</a>
-                </div>
-                {% endfor %}
+<div class="ride-card" 
+     data-ride-id="{{ ride.id }}" 
+     data-distance-km="{% if ride.pickup_distance %}{{ ride.pickup_distance }}{% else %}0{% endif %}">
+    <div class="ride-header">
+        <div class="route">{{ ride.pickup }} → {{ ride.destination }}</div>
+        <div class="price">₹{{ ride.cost }}</div>
+    </div>
+    <div class="ride-details">
+        <div class="detail-item">
+            <span class="detail-label">Driver:</span> {{ ride.user.username }}
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Date:</span> {{ ride.date }}
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Time:</span> {{ ride.time }}
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }}
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Type:</span> {{ ride.get_vehicle_type_display }}
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Distance:</span> {{ ride.distance_km }} km
+        </div>
+        {% if ride.pickup_distance %}
+        <div class="detail-item">
+            <span class="detail-label">Pickup Distance:</span> {{ ride.pickup_distance }} km
+        </div>
+        {% endif %}
+        <div class="detail-item">
+            <span class="detail-label">Gender Preference:</span> {{ ride.get_gender_display }}
+        </div>
+    </div>
+    <form action="{% url 'book_ride' ride.id %}" method="post" onsubmit="return confirm('Are you sure you want to book this ride?')">
+        {% csrf_token %}
+        <input type="hidden" name="gender" value="{{ request.user.gender|default:'any' }}">
+        <button type="submit" class="btn btn-book">Book This Ride</button>
+    </form>
+</div>
+{% endfor %}
             </div>
         {% else %}
             <div class="no-rides">
