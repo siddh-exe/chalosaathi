@@ -86,7 +86,7 @@
             <p><span class="detail-label">Date:</span> {{ ride.date }}</p>
             <p><span class="detail-label">Time:</span> {{ ride.time }}</p>
             <p><span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }} ({{ ride.vehicle_number }})</p>
-            <p><span class="detail-label">Cost:</span> ₹{{ ride.cost }}</p>
+            {% comment %} <p><span class="detail-label">Cost:</span> ₹{{ ride.cost }}</p> {% endcomment %}
             <p><span class="detail-label">Status:</span> {{ ride.status|capfirst }}</p>
         </div>
         

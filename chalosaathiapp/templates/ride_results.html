@@ -178,7 +178,7 @@
             <strong>Time:</strong> {{ search_params.time }}
         </div>
         
-        <!-- Debug Information -->
+        {% comment %} <!-- Debug Information -->
         <div class="debug-info">
             Debug Info: Found {{ rides|length }} rides<br>
             {% if search_params %}
@@ -187,7 +187,7 @@
             {% if request.POST %}
             POST Data: {{ request.POST }}<br>
             {% endif %}
-        </div>
+        </div> {% endcomment %}
         
         <!-- Distance Filter - Moved outside the rides check -->
         <div class="distance-filter {% if not rides %}disabled-filter{% endif %}">
@@ -229,7 +229,7 @@
      data-distance-km="{% if ride.pickup_distance %}{{ ride.pickup_distance }}{% else %}0{% endif %}">
     <div class="ride-header">
         <div class="route">{{ ride.pickup }} → {{ ride.destination }}</div>
-        <div class="price">₹{{ ride.cost }}</div>
+        {% comment %} <div class="price">₹{{ ride.cost }}</div> {% endcomment %}
     </div>
     <div class="ride-details">
         <div class="detail-item">
