@@ -1,47 +1,353 @@
-<!-- templates/my_bookings.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bookings - ChaloSaathi</title>
-    <!-- ... existing styles ... -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            font-size: 2.8rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .booking-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .booking-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 0 0 0 100%;
+            opacity: 0.1;
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .booking-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+        }
+
+        .booking-header h3 i {
+            margin: 0 10px;
+            color: #667eea;
+        }
+
+        .booking-header p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .booking-card p {
+            margin: 8px 0;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-completed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e63946, #c82333);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-home {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-bookings {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-bookings p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .no-bookings i {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .detail-item i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .page-actions {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .booking-header {
+                flex-direction: column;
+            }
+            
+            .booking-header h3 {
+                font-size: 1.3rem;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .page-actions {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+
+        .booking-card {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .booking-card:nth-child(2) { animation-delay: 0.1s; }
+        .booking-card:nth-child(3) { animation-delay: 0.2s; }
+        .booking-card:nth-child(4) { animation-delay: 0.3s; }
+        .booking-card:nth-child(5) { animation-delay: 0.4s; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>My Bookings</h1>
+        <h1><i class="fas fa-calendar-check"></i> My Bookings</h1>
+        
+        <div class="page-actions">
+            <a href="{% url 'index' %}" class="btn btn-home">
+                <i class="fas fa-home"></i> Go to Home Page
+            </a>
+        </div>
         
         {% if bookings %}
             {% for booking in bookings %}
             <div class="booking-card">
                 <div class="booking-header">
                     <div>
-                        <h3>{{ booking.ride.pickup }} → {{ booking.ride.destination }}</h3>
-                        <p>Date: {{ booking.ride.date }} at {{ booking.ride.time }}</p>
-                        <p>Driver: 
-                            {% if booking.ride.user.get_full_name %}
-                                {{ booking.ride.user.get_full_name }}
-                            {% else %}
-                                {{ booking.ride.user.email }}
-                            {% endif %}
-                        </p>
+                        <h3><i class="fas fa-route"></i> {{ booking.ride.pickup }} → {{ booking.ride.destination }}</h3>
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>{{ booking.ride.date }} at {{ booking.ride.time }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <span>
+                                    {% if booking.ride.user.get_full_name %}
+                                        {{ booking.ride.user.get_full_name }}
+                                    {% else %}
+                                        {{ booking.ride.user.email }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span>
                     </div>
                 </div>
                 
-                <p>Booking ID: #{{ booking.id }}</p>
-                <p>Booked on: {{ booking.booking_time|date:"d M Y, H:i" }}</p>
+                <div class="booking-details">
+                    <div class="detail-item">
+                        <i class="fas fa-hashtag"></i>
+                        <span>Booking ID: #{{ booking.id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Booked on: {{ booking.booking_time|date:"d M Y, H:i" }}</span>
+                    </div>
+                </div>
                 
                 {% if booking.status == 'pending' %}
-                <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger">Cancel Booking</a>
+                <a href="{% url 'cancel_ride' booking.id %}" class="btn btn-danger">
+                    <i class="fas fa-times-circle"></i> Cancel Booking
+                </a>
                 {% endif %}
             </div>
             {% endfor %}
         {% else %}
-            <p>You haven't made any bookings yet.</p>
-            <a href="{% url 'find_ride' %}" class="btn">Find Rides</a>
+            <div class="no-bookings">
+                <i class="fas fa-calendar-times"></i>
+                <p>You haven't made any bookings yet.</p>
+                <a href="{% url 'find_ride' %}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Find Rides
+                </a>
+            </div>
         {% endif %}
     </div>
 </body>

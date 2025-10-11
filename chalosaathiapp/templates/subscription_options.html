@@ -1,8 +1,252 @@
 {% comment %} {% extends 'base.html' %} {% endcomment %}
+{% comment %} {% extends "base.html" %} {% endcomment %}
+
 {% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1000px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 120px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        z-index: 0;
+    }
+
+    h2 {
+        margin: 20px 0 15px;
+        color: #333;
+        font-size: 32px;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    p {
+        margin-bottom: 30px;
+        color: #555;
+        font-size: 18px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .subscription-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        margin: 40px 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .option {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 30px 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .option:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        border-color: #667eea;
+    }
+
+    .option h3 {
+        margin: 0 0 15px;
+        color: #333;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .option p {
+        margin: 0 0 25px;
+        color: #555;
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .option button {
+        display: inline-block;
+        width: 100%;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .option button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .option button:active {
+        transform: translateY(0);
+    }
+
+    .alert {
+        padding: 15px 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error, .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    .ride-details {
+        background: #f0f7ff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .route {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #333;
+        font-size: 18px;
+    }
+
+    .route i {
+        color: #667eea;
+        margin: 0 10px;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 30px 20px;
+        }
+        
+        h2 {
+            font-size: 28px;
+        }
+        
+        .subscription-options {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .option {
+            padding: 25px 15px;
+        }
+    }
+
+    /* Animation for subscription cards */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .option {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .option:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .option:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .option:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+</style>
+
 <div class="container">
     <h2>Choose a Subscription Plan</h2>
-    <p>For your ride from {{ ride.pickup }} to {{ ride.destination }}</p>
+    <div class="ride-details">
+        <div class="route">
+            {{ ride.pickup }} <i class="fas fa-arrow-right"></i> {{ ride.destination }}
+        </div>
+    </div>
     {% if booking.message %}
         <p><strong>Message:</strong> {{ booking.message }}</p>
     {% endif %}

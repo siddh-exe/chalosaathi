@@ -276,6 +276,17 @@
       box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     }
 
+    .btn-home {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-home:hover {
+      background: #5a67d8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
     .btn-cancel {
       background: #e63946;
       color: white;
@@ -355,6 +366,13 @@
       opacity: 1;
     }
 
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
     @media (max-width: 768px) {
       .container {
         max-width: 100%;
@@ -374,6 +392,10 @@
       
       .ride-actions {
         justify-content: center;
+      }
+      
+      .button-group {
+        flex-direction: column;
       }
     }
   </style>
@@ -408,9 +430,14 @@
           </div>
         </div>
         
-        <a href="{% url 'logout' %}" class="btn btn-logout">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
+        <div class="button-group">
+          <a href="{% url 'index' %}" class="btn btn-home">
+            <i class="fas fa-home"></i> Go to Home Page
+          </a>
+          <a href="{% url 'logout' %}" class="btn btn-logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
       </div>
     </div>
 

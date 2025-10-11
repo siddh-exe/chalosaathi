@@ -13,13 +13,10 @@ import random
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 from django.contrib.auth.decorators import login_required
-
 from django.conf import settings
-
 from django.contrib.gis.measure import D
 from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404
-
 from django.utils import timezone
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -28,7 +25,8 @@ from django.db import transaction
 from celery import shared_task
 from django.utils.html import strip_tags
 import logging
-from .tasks import send_booking_status_notification_email, send_booking_notification_email
+from .tasks import send_booking_status_notification_email, send_booking_notification_email,send_booking_status_notificatio_email
+
 # Create your views here.
 def index(request):
      user_name = request.session.get('full_name')  # None if not logged in
@@ -264,24 +262,12 @@ def feedback_view(request):
         form = FeedbackForm(request.POST)
         if form.is_valid():
             form.save()
-            form = FeedbackForm()  # reset form after save
+            return JsonResponse({"status": "success", "message": "Feedback submitted successfully"})
+        else:
+            return JsonResponse({"status": "error", "errors": form.errors}, status=400)
     else:
         form = FeedbackForm()
-
     return render(request, 'feedback.html', {'form': form})
-
-
-def feedback_list(request):
-    feedbacks = Feedback.objects.all().order_by('-created_at')
-    data = [
-        {
-            'name': fb.name,
-            'message': fb.message,
-            'created_at': fb.created_at.strftime('%Y-%m-%d %H:%M')
-        }
-        for fb in feedbacks
-    ]
-    return JsonResponse(data, safe=False)
 
 def feedback_data(request):
     feedbacks = Feedback.objects.all().order_by('-created_at')
@@ -293,7 +279,7 @@ def feedback_data(request):
         }
         for fb in feedbacks
     ]
-    return JsonResponse(data, safe=False)
+    return JsonResponse({"feedbacks": data})
 
 def send_email_view(request):
     success = False
@@ -611,7 +597,7 @@ def confirm_booking(request, booking_id):
             booking.status = 'confirmed'
             booking.save()
             # Call synchronously for development (no .delay())
-            send_booking_status_notification_email(booking.id, 'confirmed')
+            send_booking_status_notificatio_email(booking.id, 'confirmed')
             messages.success(request, 'Booking confirmed successfully.')
         else:
             messages.error(request, 'Booking cannot be confirmed.')

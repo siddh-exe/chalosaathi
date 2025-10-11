@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @shared_task
-def send_booking_status_notification_email(booking_id, status):
+def send_booking_status_notificatio_email(booking_id, status):
     try:
         booking = Booking.objects.get(id=booking_id)
         ride = booking.ride
@@ -25,6 +25,34 @@ def send_booking_status_notification_email(booking_id, status):
         send_mail(subject, plain_message, settings.DEFAULT_FROM_EMAIL, [passenger.email],
                   html_message=html_message, fail_silently=False)
         logger.info(f'Booking {status} email sent for booking {booking_id} to {passenger.email}')
+    except Exception as e:
+        logger.error(f'Failed to send {status} email for booking {booking_id}: {str(e)}')
+
+@shared_task
+def send_booking_status_notification_email(booking_id, status):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        ride = booking.ride
+        passenger = booking.passenger
+        passenger_name = f'{passenger.first_name} {passenger.last_name}'.strip() or passenger.username
+        subject = f'Booking {status.title()} - {ride.pickup} to {ride.destination}'
+        message = render_to_string('emails/booking_status_notification.txt', {
+            'booking': booking,
+            'ride': ride,
+            'passenger': passenger,
+            'passenger_name': passenger_name,
+            'status': status.title(),
+        })
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [passenger.email],
+            fail_silently=False,
+        )
+        logger.info(f'Booking {status} email sent for booking {booking_id} to {passenger.email}')
+    except Booking.DoesNotExist:
+        logger.error(f'Booking {booking_id} not found for status {status} email')
     except Exception as e:
         logger.error(f'Failed to send {status} email for booking {booking_id}: {str(e)}')
 
