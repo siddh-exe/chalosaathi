@@ -26,7 +26,7 @@ from celery import shared_task
 from django.utils.html import strip_tags
 import logging
 from .tasks import send_booking_status_notification_email, send_booking_notification_email,send_booking_status_notificatio_email
-
+from django.core.mail import EmailMultiAlternatives
 # Create your views here.
 def index(request):
      user_name = request.session.get('full_name')  # None if not logged in
@@ -584,11 +584,30 @@ def my_bookings(request):
 def ride_bookings(request, ride_id):
     ride = get_object_or_404(Ride, id=ride_id, user=request.user)
     bookings = Booking.objects.filter(ride=ride).select_related('passenger').order_by('-booking_time')
+
+    # Calculate plan name, total cost, and passenger name for each booking
+    for booking in bookings:
+        base_cost = ride.cost
+        if booking.subscription_type == 'weekly':
+            booking.total_cost = base_cost * 1.5
+            booking.plan_name = "Weekly Plan (7 Rides)"
+        elif booking.subscription_type == 'monthly':
+            booking.total_cost = base_cost * 5
+            booking.plan_name = "Monthly Plan (30 Rides)"
+        elif booking.subscription_type == 'quarterly':
+            booking.total_cost = base_cost * 14
+            booking.plan_name = "Quarterly Plan (90 Rides)"
+        else:
+            booking.total_cost = base_cost
+            booking.plan_name = "One-Time Ride"
+        
+        # Compute passenger name with fallback to email
+        booking.passenger_name = booking.passenger.full_name if booking.passenger.full_name else booking.passenger.email
+
     return render(request, 'ride_bookings.html', {
         'ride': ride,
         'bookings': bookings,
     })
-
 @login_required
 def confirm_booking(request, booking_id):
     with transaction.atomic():
@@ -621,59 +640,53 @@ def cancel_booking_driver(request, booking_id):
 def choose_subscription(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, passenger=request.user, status='pending')
     ride = booking.ride
-    base_cost = ride.cost  # Use the ride's cost as the base price
+    base_cost = ride.cost
 
-    # Calculate subscription prices (example rates based on ride cost)
-    weekly_cost = base_cost * 1.5   # 50% extra for 7 rides
-    monthly_cost = base_cost * 5    # 5x base for 30 rides
-    quarterly_cost = base_cost * 14  # 14x base for 90 rides
+    # Subscription costs
+    weekly_cost = base_cost * 1.5
+    monthly_cost = base_cost * 5
+    quarterly_cost = base_cost * 14
 
     if request.method == 'POST':
         subscription_type = request.POST.get('subscription_type')
         if subscription_type in ['weekly', 'monthly', 'quarterly']:
             booking.subscription_type = subscription_type
-            # booking.status = 'confirmed'  # Confirm the booking upon selection
             booking.save()
 
-            # Send email to the driver (using ride.user)
-            driver = ride.user  # The user field in Ride model represents the driver
+            driver = ride.user
             if driver and driver.email:
+                # Calculate cost for selected plan
+                total_cost = {
+                    'weekly': weekly_cost,
+                    'monthly': monthly_cost,
+                    'quarterly': quarterly_cost
+                }[subscription_type]
+
+                # Use full_name directly with fallback to email
+                driver_name = driver.full_name if driver.full_name else driver.email
+                passenger_name = request.user.full_name if request.user.full_name else request.user.email
+
+                # Render HTML content
+                html_content = render_to_string('booking_email.html', {
+                    'driver_name': driver_name,
+                    'passenger_name': passenger_name,
+                    'ride': ride,
+                    'subscription_type': subscription_type.title(),
+                    'total_cost': round(total_cost, 2),
+                })
+
                 subject = 'New Booking Confirmation - Subscription Selected'
-                message = (
-                    f'Hello {driver.get_full_name() or driver.username},\n\n'
-                    f'A new subscription booking has been confirmed for your ride!\n\n'
-                    f'Ride Details:\n'
-                    f'- From: {ride.pickup}\n'
-                    f'- To: {ride.destination}\n'
-                    f'- Date: {ride.date}\n'
-                    f'- Time: {ride.time}\n'
-                    f'- Vehicle: {ride.vehicle_model} ({ride.vehicle_number})\n\n'
-                    f'Subscription Type: {subscription_type.title()}\n'
-                    f'Passenger: {request.user.get_full_name() or request.user.username}\n'
-                    f'Booking ID: {booking.id}\n'
-                    f'Base Cost: ₹{base_cost}\n\n'
-                    f'Please check your dashboard for more details and prepare for the ride.\n\n'
-                    f'Thank you!'
-                )
                 from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [driver.email]
+                to_email = [driver.email]
 
                 try:
-                    send_mail(
-                        subject,
-                        message,
-                        from_email,
-                        recipient_list,
-                        fail_silently=False,
-                    )
+                    msg = EmailMultiAlternatives(subject, '', from_email, to_email)
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
                     messages.success(request, f'Booking confirmed with {subscription_type} subscription! Driver notified via email.')
                 except Exception as e:
-                    # Log the error but don't fail the booking
-                    print(f"Failed to send email to driver {driver.email}: {str(e)}")
-                    messages.warning(request, f'Booking confirmed with {subscription_type} subscription! (Email notification to driver failed)')
-            else:
-                driver_name = driver.get_full_name() or driver.username if driver else "Unknown Driver"
-                messages.warning(request, f'Booking confirmed with {subscription_type} subscription! Driver {driver_name} has no email address.')
+                    print(f"Failed to send email: {e}")
+                    messages.warning(request, f'Booking confirmed, but email could not be sent.')
 
             return redirect('booking_confirmation', booking_id=booking.id)
         messages.error(request, 'Invalid subscription option.')

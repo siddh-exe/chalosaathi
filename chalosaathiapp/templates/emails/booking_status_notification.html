@@ -72,8 +72,10 @@
             <p><span class="detail-label">Time:</span> {{ ride.time }}</p>
             <p><span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }} ({{ ride.vehicle_number }})</p>
             <p><span class="detail-label">Vehicle Type:</span> {{ ride.get_vehicle_type_display }}</p>
-            <p><span class="detail-label">Cost:</span> ₹{{ ride.cost }}</p>
-            <p><span class="detail-label">Driver:</span> {{ ride.user.username }}</p>
+            <p><span class="detail-label">Plan:</span> {{ plan_name }}</p>
+            <p><span class="detail-label">Total Cost:</span> ₹{{ total_cost|floatformat:2 }}</p>
+            <p><span class="detail-label">Driver:</span> {{ driver_name }}</p>
+
             
             {% if status == "Confirmed" %}
                 <p>Please contact the driver to coordinate pickup details.</p>

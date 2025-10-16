@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Confirmation</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
+        h1 { color: #3498db; }
+        p { color: #555; line-height: 1.6; }
+        .detail-label { font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Booking Confirmed!</h1>
+        <p>Hello {{ driver_name }},</p>
+        <p>A passenger has selected a subscription for your ride. Details are below:</p>
+
+        <h2>Ride Details</h2>
+        <p><span class="detail-label">Route:</span> {{ ride.pickup }} → {{ ride.destination }}</p>
+        <p><span class="detail-label">Date:</span> {{ ride.date }}</p>
+        <p><span class="detail-label">Time:</span> {{ ride.time }}</p>
+        <p><span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }} ({{ ride.vehicle_number }})</p>
+
+        <h2>Booking Details</h2>
+        <p><span class="detail-label">Passenger:</span> {{ passenger_name }}</p>
+        <p><span class="detail-label">Subscription:</span> {{ subscription_type }}</p>
+        <p><span class="detail-label">Total Cost:</span> ₹{{ total_cost }}</p>
+
+        <p>Please check your dashboard for more details and prepare for the ride.</p>
+        <p>Thank you!</p>
+    </div>
+</body>
+</html>

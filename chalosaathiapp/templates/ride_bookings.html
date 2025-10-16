@@ -3,112 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Requests for Ride</title>
+    <title>My Bookings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f7fa;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
             color: #333;
-        }
-        .ride-details {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .booking-item {
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
-        }
-        .booking-item:last-child {
-            border-bottom: none;
-        }
-        .detail-label {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .btn {
-            display: inline-block;
-            padding: 8px 15px;
-            border: none;
-            color: white;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            margin: 5px;
-        }
-        .btn-confirm {
-            background: #27ae60;
-        }
-        .btn-confirm:hover {
-            background: #219a52;
-        }
-        .btn-cancel {
-            background: #e63946;
-        }
-        .btn-cancel:hover {
-            background: #c82333;
-        }
-        .btn-back {
-            background: #3498db;
-        }
-        .btn-back:hover {
-            background: #2980b9;
-        }
-        .no-bookings {
-            color: #777;
-            font-style: italic;
-            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.3));
+            border-radius: 2px;
+        }
+
+        h1 i {
+            color: #fff;
+            font-size: 2.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Page Actions */
+        .page-actions {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-profile {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-profile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Booking Cards */
+        .booking-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booking-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .booking-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .booking-header h3 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .booking-header h3 i {
+            color: #667eea;
+            font-size: 1.6rem;
+        }
+
+        /* Booking Details */
+        .booking-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #555;
+            background: rgba(102, 126, 234, 0.05);
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .detail-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+        }
+
+        .detail-item i {
+            color: #667eea;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Status Badge */
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .status-confirmed {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        /* No Bookings Message */
+        .no-bookings {
+            text-align: center;
+            padding: 80px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-bookings i {
+            font-size: 5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .no-bookings p {
+            font-size: 1.4rem;
+            color: #555;
+            margin-bottom: 35px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .page-actions {
+                margin-bottom: 30px;
+            }
+            
+            .booking-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .booking-details {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .booking-card {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                padding: 10px 18px;
+                font-size: 0.9rem;
+            }
+            
+            .booking-card {
+                padding: 15px;
+            }
+            
+            .no-bookings {
+                padding: 50px 15px;
+            }
+            
+            .no-bookings i {
+                font-size: 3.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="{% url 'profile' %}" class="btn btn-back">← Back to Profile</a>
-        <h1>Booking Requests for Ride</h1>
+        <h1><i class="fas fa-calendar-check"></i> My Bookings</h1>
         
-        <div class="ride-details">
-            <h2>Ride Details</h2>
-            <p><span class="detail-label">Route:</span> {{ ride.pickup }} to {{ ride.destination }}</p>
-            <p><span class="detail-label">Date:</span> {{ ride.date }}</p>
-            <p><span class="detail-label">Time:</span> {{ ride.time }}</p>
-            <p><span class="detail-label">Vehicle:</span> {{ ride.vehicle_model }} ({{ ride.vehicle_number }})</p>
-            {% comment %} <p><span class="detail-label">Cost:</span> ₹{{ ride.cost }}</p> {% endcomment %}
-            <p><span class="detail-label">Status:</span> {{ ride.status|capfirst }}</p>
+        <div class="page-actions">
+            <a href="{% url 'profile' %}" class="btn btn-profile">
+                <i class="fas fa-user-circle"></i> Go to Profile
+            </a>
         </div>
         
-        <h2>Bookings</h2>
         {% if bookings %}
             {% for booking in bookings %}
-                <div class="booking-item">
-                    <p><span class="detail-label">Passenger:</span> {{ booking.passenger.get_full_name|default:booking.passenger.username }}</p>
-                    <p><span class="detail-label">Email:</span> {{ booking.passenger.email }}</p>
-                    <p><span class="detail-label">Phone:</span> {{ booking.contact_number|default:"Not provided" }}</p>
-                    <p><span class="detail-label">Pickup Location:</span> {{ booking.pickup_location|default:ride.pickup }}</p>
-                    <p><span class="detail-label">Status:</span> {{ booking.status|capfirst }}</p>
-                    <p><span class="detail-label">Booked On:</span> {{ booking.booking_time }}</p>
-                    <p><span class="detail-label">Message:</span> {{ booking.message|default:"None" }}</p>
-                    {% if booking.status == "pending" %}
-                        <a href="{% url 'confirm_booking' booking.id %}" class="btn btn-confirm" onclick="return confirm('Confirm this booking?')">Confirm</a>
-                        <a href="{% url 'cancel_booking_driver' booking.id %}" class="btn btn-cancel" onclick="return confirm('Cancel this booking?')">Cancel</a>
-                    {% endif %}
+            <div class="booking-card">
+                <div class="booking-header">
+                    <div>
+                        <h3><i class="fas fa-route"></i> {{ booking.ride.pickup }} → {{ booking.ride.destination }}</h3>
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>{{ booking.ride.date }} at {{ booking.ride.time }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <span>
+                                    {% if booking.ride.user.full_name %}
+                                        {{ booking.ride.user.full_name }}
+                                    {% else %}
+                                        {{ booking.ride.user.email }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <span>Passenger: {{ booking.passenger_name }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-ticket-alt"></i>
+                                <span>{{ booking.plan_name }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>Total Cost: ₹{{ booking.total_cost|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                    </div>
                 </div>
+                
+                <div class="booking-details">
+                    <div class="detail-item">
+                        <i class="fas fa-hashtag"></i>
+                        <span>Booking ID: #{{ booking.id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Booked on: {{ booking.booking_time|date:"d M Y, H:i" }}</span>
+                    </div>
+                </div>
+                
+                {% if booking.status == 'pending' %}
+                <a href="{% url 'cancel_booking_driver' booking.id %}" class="btn btn-danger">
+                    <i class="fas fa-times-circle"></i> Cancel Booking
+                </a>
+                {% endif %}
+            </div>
             {% endfor %}
         {% else %}
-            <p class="no-bookings">No booking requests for this ride.</p>
+            <div class="no-bookings">
+                <i class="fas fa-calendar-times"></i>
+                <p>You haven't made any bookings yet.</p>
+                <a href="{% url 'find_ride' %}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Find Rides
+                </a>
+            </div>
         {% endif %}
     </div>
 </body>

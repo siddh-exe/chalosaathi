@@ -334,7 +334,7 @@
                 </div>
                 
                 {% if booking.status == 'pending' %}
-                <a href="{% url 'cancel_ride' booking.id %}" class="btn btn-danger">
+                <a href="{% url 'cancel_booking_driver' booking.id %}" class="btn btn-danger">
                     <i class="fas fa-times-circle"></i> Cancel Booking
                 </a>
                 {% endif %}
