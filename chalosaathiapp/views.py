@@ -27,11 +27,11 @@ from django.utils.html import strip_tags
 import logging
 from .tasks import send_booking_status_notification_email, send_booking_notification_email,send_booking_status_notificatio_email
 from django.core.mail import EmailMultiAlternatives
+from chalosaathiapp.models import UserProfile
 # Create your views here.
 def index(request):
      user_name = request.session.get('full_name')  # None if not logged in
-     avatar = request.session.get('avatar')
-     return render(request, "index.html", {"user_name": user_name, "avatar": avatar})
+     return render(request, "index.html", {"user_name": user_name, 'avatar': request.user.avatar.url if hasattr(request.user, 'avatar') and request.user.avatar else None })
 
 @login_required
 def profile(request):
@@ -44,7 +44,7 @@ def profile(request):
         "phone": request.session.get("phone", ""),
         "aadhaar": request.session.get("aadhaar", ""),
         "gender": request.session.get("gender", ""),
-        "avatar": request.session.get("avatar", ""),
+        'avatar': request.user.avatar.url if hasattr(request.user, 'avatar') and request.user.avatar else None,
         "rides": rides,
     })
 

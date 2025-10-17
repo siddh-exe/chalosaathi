@@ -149,7 +149,7 @@
       <label for="avatarInput">
         <div class="avatar-preview" id="avatarPreview"></div>
       </label>
-      <input type="file" id="avatarInput" accept="image/*">
+      <input type="file" id="avatarInput" name="avatar" accept="image/*">
     </div>
       <div class="input-group">
         <input type="text" name="full_name" placeholder="Full Name" required>
@@ -187,6 +187,7 @@
       <button type="submit">Sign Up</button>
       <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
     </form>
+
   </div>
 
   <script>
