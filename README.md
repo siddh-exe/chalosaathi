@@ -72,7 +72,7 @@ cd chalosaathi
 ### 3️⃣ Install Dependencies
 
 ```bash
-pip install django celery geopy
+pip install django celery geopy pillow
 ```
 
 ---
